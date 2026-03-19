@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Sports Photography – Arpith Binsa</title>
+    <link rel="stylesheet" href="../style.css">
+    <!-- PayPal SDK -->
+    <script src="https://www.paypal.com/sdk/js?client-id=YOUR_CLIENT_ID&currency=EUR"></script>
+</head>
+
+<body>
+
+    <div class="navbar">
+        <div class="container nav-container">
+            <div class="logo">
+                <img src="../images/favicon (1) (1).png" alt="Logo" width="50px">
+                <span>Arpith Binsa</span>
+            </div>
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="../index.html">Home</a></li>
+                    <li><a href="services.html" class="active">Services</a></li>
+                    <li><a href="products.html">Products</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                    <li><a href="account.html" class="btn-nav">Account</a></li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+
+    <!-- SERVICE HERO -->
+    <div class="service-detail-hero">
+        <div class="container">
+            <a href="services.html" class="back-link">← Back to Services</a>
+            <p class="section-label">Sports Photography</p>
+            <h1>Football & Action</h1>
+            <p class="service-detail-desc">Raw intensity and passion captured at the perfect moment. Available for
+                matches, training sessions and sporting events across Berlin and beyond.</p>
+            <div class="service-detail-price">€200 – €500</div>
+        </div>
+    </div>
+
+    <!-- IMAGE GRID -->
+    <div class="service-gallery">
+        <div class="container">
+            <div class="gallery-grid">
+                <div class="gallery-img-wrap">
+                    <img src="../images/services/football.jpg" alt="Sports Photography">
+                </div>
+                <div class="gallery-img-wrap">
+                    <img src="../images/services/football2.jpg" alt="Sports Photography">
+                </div>
+                <div class="gallery-img-wrap">
+                    <img src="../images/services/football3.jpg" alt="Sports Photography">
+                </div>
+                <div class="gallery-img-wrap">
+                    <img src="../images/services/football4.jpg" alt="Sports Photography">
+                </div>
+                <div class="gallery-img-wrap">
+                    <img src="../images/services/football5.jpg" alt="Sports Photography">
+                </div>
+                <div class="gallery-img-wrap">
+                    <img src="../images/services/football6.jpg" alt="Sports Photography">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- BOOKING + PAYMENT -->
+    <div class="booking-section">
+        <div class="container">
+            <div class="booking-box">
+
+                <div class="booking-left">
+                    <h2>Book This Service</h2>
+                    <p>Select a date and complete payment to confirm your booking.</p>
+
+                    <div class="form-group">
+                        <label>Select Date</label>
+                        <input type="date" id="booking-date" class="date-input">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Select Package</label>
+                        <select id="booking-package" class="select-input" onchange="updatePrice()">
+                            <option value="200">Basic – 2 hours (€200)</option>
+                            <option value="350">Standard – 4 hours (€350)</option>
+                            <option value="500">Full Day – 8 hours (€500)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Your Name</label>
+                        <input type="text" id="booking-name" class="text-input" placeholder="Enter your name">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Your Email</label>
+                        <input type="email" id="booking-email" class="text-input" placeholder="Enter your email">
+                    </div>
+
+                    <div class="price-display">
+                        Total: <span id="total-price">€200</span>
+                    </div>
+                </div>
+
+                <div class="booking-right">
+                    <h2>Complete Payment</h2>
+                    <p>Secure payment via PayPal sandbox.</p>
+                    <div id="paypal-button-container"></div>
+                    <div id="booking-success" class="booking-success" style="display:none">
+                        Booking confirmed! Check your email for details.
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <div class="container">
+            <p>© 2026 Arpith Binsa. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script>
+        function updatePrice() {
+            const price = document.getElementById('booking-package').value;
+            document.getElementById('total-price').textContent = '€' + price;
+        }
+
+        function validateForm() {
+            const date = document.getElementById('booking-date').value;
+            const name = document.getElementById('booking-name').value;
+            const email = document.getElementById('booking-email').value;
+            if (!date || !name || !email) {
+                alert('Please fill in all fields before paying.');
+                return false;
+            }
+            return true;
+        }
+
+        paypal.Buttons({
+            createOrder: function (data, actions) {
+                if (!validateForm()) return;
+                const price = document.getElementById('booking-package').value;
+                return actions.order.create({
+                    purchase_units: [{
+                        amount: {
+                            value: price,
+                            currency_code: 'EUR'
+                        },
+                        description: 'Sports Photography Booking – Arpith Binsa'
+                    }]
+                });
+            },
+            onApprove: function (data, actions) {
+                return actions.order.capture().then(function (details) {
+                    // Save order to your backend here later
+                    document.getElementById('paypal-button-container').style.display = 'none';
+                    document.getElementById('booking-success').style.display = 'block';
+                });
+            },
+            onError: function (err) {
+                alert('Payment failed. Please try again.');
+            }
+        }).render('#paypal-button-container');
+    </script>
+
+</body>
+
+</html>

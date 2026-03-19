@@ -1,26 +1,177 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>Arpith Binsa</title>
     <link rel="stylesheet" href="style.css">
 </head>
-<body>  
-<div class="navbar">
-    <div class="logo">
-        <img ...>
-        <h1>Arpith Binsa</h1>
+
+<body>
+
+    <div class="navbar">
+        <div class="container nav-container">
+            <div class="logo">
+                <img src="images/favicon (1) (1).png" alt="Logo" width="50px">
+                <span>Arpith Binsa</span>
+            </div>
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="index.html" class="active">Home</a></li>
+                    <li><a href="pages/services.html">Services</a></li>
+                    <li><a href="pages/products.html">Products</a></li>
+                    <li><a href="pages/contact.html">Contact</a></li>
+                    <li><a href="pages/account.html" class="btn-nav">Account</a></li>
+                </ul>
+            </nav>
+        </div>
     </div>
-    <ul class="nav-links"> ← inside navbar
-        ...
-    </ul>
-</div> ← closes here
-        <ul class="nav-links">
-            <li><a href="#">Home</a></li>
-            <li><a href="#">About</a></li>
-            <li><a href="#">Projects</a></li>
-            <li><a href="#">Contact</a></li>
-        </ul>
+
+    <div class="hero">
+        <div class="hero-overlay"></div>
+        <div class="container hero-content">
+            <p class="hero-sub">Photography & Videography</p>
+            <h1>Turn Moments into<br>Masterpieces</h1>
+            <p class="hero-desc">Based in Berlin. Available worldwide.</p>
+            <a href="pages/services.html" class="btn-primary">View Services</a>
+        </div>
+    </div>
+
+    <div class="services" id="services">
+        <div class="container">
+            <p class="section-label">What I Offer</p>
+            <h2>Services</h2>
+            <div class="services-grid">
+
+                <div class="service-card">
+                    <div class="service-img-wrap">
+                        <img src="images/services/football.jpg" alt="Sports Photography">
+                    </div>
+                    <div class="service-info">
+                        <h3>Sports Photography</h3>
+                        <p>Football, athletics and action shots that capture the energy of the moment.</p>
+                        <span class="price">€200 – €500</span>
+                    </div>
+                </div>
+
+                <div class="service-card">
+                    <div class="service-img-wrap">
+                        <img src="images/wedding.jpg" alt="Wedding Photography">
+                    </div>
+                    <div class="service-info">
+                        <h3>Wedding Photography</h3>
+                        <p>Timeless wedding coverage from ceremony to reception.</p>
+                        <span class="price">€1000 – €2000</span>
+                    </div>
+                </div>
+
+                <div class="service-card">
+                    <div class="service-img-wrap">
+                        <img src="images/product.jpg" alt="Commercial Shoots">
+                    </div>
+                    <div class="service-info">
+                        <h3>Commercial / Ad Shoots</h3>
+                        <p>Product and brand photography built for campaigns and advertising.</p>
+                        <span class="price">€800 – €1500</span>
+                    </div>
+                </div>
+
+                <div class="service-card">
+                    <div class="service-img-wrap">
+                        <img src="images/potrait.jpg" alt="Portrait Sessions">
+                    </div>
+                    <div class="service-info">
+                        <h3>Portrait Sessions</h3>
+                        <p>Professional headshots and personal portraits in studio or on location.</p>
+                        <span class="price">€150 – €300</span>
+                    </div>
+                </div>
+
+                <a href="pages/services.html" class="service-card service-seemore">
+                    <div class="seemore-content">
+                        <div class="seemore-arrow">→</div>
+                        <p>See All</p>
+                        <p>Services</p>
+                    </div>
+                </a>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- PRODUCTS -->
+    <div class="products" id="products">
+        <div class="container">
+            <p class="section-label">Gears That I Use Everyday</p>
+            <h2>Products</h2>
+            <div class="products-grid">
+    
+                <div class="product-card">
+                    <div class="product-img-wrap">
+                        <img src="images/a7m3.jpg" alt="Sony A7 III">
+                    </div>
+                    <div class="product-info">
+                        <span class="product-tag">Camera Body</span>
+                        <h3>Sony A7 III</h3>
+                        <p>Full-frame mirrorless. My primary shooting body for everything.</p>
+                        <span class="price">€1,299</span>
+                    </div>
+                </div>
+    
+                <div class="product-card">
+                    <div class="product-img-wrap">
+                        <img src="images/200600.jpg" alt="Sony 200-600mm G">
+                    </div>
+                    <div class="product-info">
+                        <span class="product-tag">Lens</span>
+                        <h3>Sony 200-600mm G</h3>
+                        <p>My go-to for sports and action. Reaches far without losing sharpness.</p>
+                        <span class="price">€1,548</span>
+                    </div>
+                </div>
+    
+                <div class="product-card">
+                    <div class="product-img-wrap">
+                        <img src="images/50mm.jpg" alt="Sony 50mm f1.8">
+                    </div>
+                    <div class="product-info">
+                        <span class="product-tag">Lens</span>
+                        <h3>Sony 50mm f1.8</h3>
+                        <p>Lightweight and sharp. Perfect for portraits and everyday shooting.</p>
+                        <span class="price">€179</span>
+                    </div>
+                </div>
+    
+                <div class="product-card">
+                    <div class="product-img-wrap">
+                        <img src="images/rs3mini.jpg" alt="DJI RS3 Mini">
+                    </div>
+                    <div class="product-info">
+                        <span class="product-tag">Stabiliser</span>
+                        <h3>DJI RS3 Mini</h3>
+                        <p>Compact gimbal that keeps footage smooth without the bulk.</p>
+                        <span class="price">€209</span>
+                    </div>
+                </div>
+    
+                <a href="pages/products.html" class="product-card product-seemore">
+                    <div class="seemore-content">
+                        <div class="seemore-arrow">→</div>
+                        <p>See All</p>
+                        <p>Products</p>
+                    </div>
+                </a>
+    
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <div class="container">
+            <p>© 2026 Arpith Binsa. All rights reserved.</p>
+        </div>
+    </div>
 
 </body>
+
 </html>
