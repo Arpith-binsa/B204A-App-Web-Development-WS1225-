@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Sony A7 III – Arpith Binsa</title>
+    <link rel="stylesheet" href="../../style.css">
+    <script src="https://www.paypal.com/sdk/js?client-id=YOUR_CLIENT_ID&currency=EUR"></script>
+</head>
+
+<body>
+
+    <div class="navbar">
+        <div class="container nav-container">
+            <div class="logo">
+                <img src="../../images/favicon (1) (1).png" alt="Logo" width="50px">
+                <span>Arpith Binsa</span>
+            </div>
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="../../index.html">Home</a></li>
+                    <li><a href="../services.html">Services</a></li>
+                    <li><a href="../products.html" class="active">Products</a></li>
+                    <li><a href="../contact.html">Contact</a></li>
+                    <li><a href="../account.html" class="btn-nav">Account</a></li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+
+    <div class="product-detail-page">
+        <div class="container">
+            <a href="../products.html" class="back-link">← Back to Products</a>
+
+            <div class="product-detail-grid">
+
+                <!-- LEFT — IMAGE SLIDER -->
+                <div class="product-detail-left">
+                    <div class="slider-main">
+                        <button class="slider-btn slider-prev" onclick="changeSlide(-1)">&#8592;</button>
+                        <div class="slider-img-wrap">
+                            <img id="slider-img" src="../../images/products/a7m3_1.jpg" alt="Sony A7 III">
+                        </div>
+                        <button class="slider-btn slider-next" onclick="changeSlide(1)">&#8594;</button>
+                    </div>
+
+                    <div class="slider-counter">
+                        <span id="slider-current">1</span> / <span id="slider-total">4</span>
+                    </div>
+
+                    <div class="slider-thumbs">
+                        <div class="thumb active" onclick="goToSlide(0)">
+                            <img src="../../images/products/a7m3_1.jpg" alt="">
+                        </div>
+                        <div class="thumb" onclick="goToSlide(1)">
+                            <img src="../../images/products/a7m3_2.jpg" alt="">
+                        </div>
+                        <div class="thumb" onclick="goToSlide(2)">
+                            <img src="../../images/products/a7m3_3.jpg" alt="">
+                        </div>
+                        <div class="thumb" onclick="goToSlide(3)">
+                            <img src="../../images/products/a7m3_4.jpg" alt="">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RIGHT — PRODUCT INFO -->
+                <div class="product-detail-right">
+
+                    <span class="product-tag">Camera Body</span>
+                    <h1 class="product-detail-title">Sony A7 III</h1>
+                    <p class="product-detail-sub">Full-frame mirrorless camera — my primary shooting body.</p>
+
+                    <div class="product-detail-price">€1,299</div>
+
+                    <!-- SPECS — fill these in yourself -->
+                    <div class="product-specs">
+                        <h3>Technical Details</h3>
+                        <table class="specs-table">
+                            <tr>
+                                <td>Sensor</td>
+                                <td>24.2MP Full-Frame BSI CMOS</td>
+                            </tr>
+                            <tr>
+                                <td>ISO Range</td>
+                                <td>100 – 51200</td>
+                            </tr>
+                            <tr>
+                                <td>Autofocus</td>
+                                <td>693 Phase-detect points</td>
+                            </tr>
+                            <tr>
+                                <td>Video</td>
+                                <td>4K 30fps</td>
+                            </tr>
+                            <tr>
+                                <td>Battery Life</td>
+                                <td>~710 shots</td>
+                            </tr>
+                            <tr>
+                                <td>Weight</td>
+                                <td>650g</td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <!-- QUANTITY + BUTTONS -->
+                    <div class="product-actions">
+
+                        <div class="quantity-wrap">
+                            <label>Quantity</label>
+                            <div class="quantity-control">
+                                <button onclick="changeQty(-1)">−</button>
+                                <span id="qty">1</span>
+                                <button onclick="changeQty(1)">+</button>
+                            </div>
+                        </div>
+
+                        <button class="btn-add-cart" onclick="addToCart()">Add to Cart</button>
+                        <div id="paypal-button-container"></div>
+
+                        <div id="order-success" class="booking-success" style="display:none">
+                            Order confirmed! You will receive an email shortly.
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <div class="container">
+            <p>© 2026 Arpith Binsa. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script>
+        // SLIDER
+        const images = [
+            '../../images/products/a7m3_1.jpg',
+            '../../images/products/a7m3_2.jpg',
+            '../../images/products/a7m3_3.jpg',
+            '../../images/products/a7m3_4.jpg'
+        ];
+
+        let current = 0;
+
+        function changeSlide(direction) {
+            current = (current + direction + images.length) % images.length;
+            updateSlider();
+        }
+
+        function goToSlide(index) {
+            current = index;
+            updateSlider();
+        }
+
+        function updateSlider() {
+            document.getElementById('slider-img').src = images[current];
+            document.getElementById('slider-current').textContent = current + 1;
+            document.querySelectorAll('.thumb').forEach((t, i) => {
+                t.classList.toggle('active', i === current);
+            });
+        }
+
+        // QUANTITY
+        let qty = 1;
+        const price = 1299;
+
+        function changeQty(direction) {
+            qty = Math.max(1, qty + direction);
+            document.getElementById('qty').textContent = qty;
+        }
+
+        // ADD TO CART — connect to backend later
+        function addToCart() {
+            alert(`${qty} x Sony A7 III added to cart!`);
+        }
+
+        // PAYPAL — Buy Now
+        paypal.Buttons({
+            createOrder: function (data, actions) {
+                return actions.order.create({
+                    purchase_units: [{
+                        amount: {
+                            value: (price * qty).toString(),
+                            currency_code: 'EUR'
+                        },
+                        description: `Sony A7 III x${qty} – Arpith Binsa`
+                    }]
+                });
+            },
+            onApprove: function (data, actions) {
+                return actions.order.capture().then(function (details) {
+                    document.getElementById('paypal-button-container').style.display = 'none';
+                    document.getElementById('order-success').style.display = 'block';
+                });
+            },
+            onError: function (err) {
+                alert('Payment failed. Please try again.');
+            },
+            style: {
+                color: 'gold',
+                shape: 'pill',
+                label: 'buynow',
+                height: 50
+            }
+        }).render('#paypal-button-container');
+    </script>
+
+</body>
+
+</html>

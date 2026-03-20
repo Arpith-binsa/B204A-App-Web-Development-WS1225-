@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Fashion Photography – Arpith Binsa</title>
+    <link rel="stylesheet" href="../../style.css">
+    <script
+        src="https://www.paypal.com/sdk/js?client-id=ATLGa7p3a7o8yrpzlIlDmOSI8cPnZT_QyID5ajjYTfxYumjay_QUZwrlmmWBUJ6XWutoZUwi2VUcJswe&currency=EUR"></script>
+</head>
+
+<body>
+
+    <div class="navbar">
+        <div class="container nav-container">
+            <div class="logo">
+                <img src="../../images/favicon (1) (1).png" alt="Logo" width="50px">
+                <span>Arpith Binsa</span>
+            </div>
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="../../index.html">Home</a></li>
+                    <li><a href="../services.html" class="active">Services</a></li>
+                    <li><a href="../products.html">Products</a></li>
+                    <li><a href="../contact.html">Contact</a></li>
+                    <li><a href="../account.html" class="btn-nav">Account</a></li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+
+    <!-- SERVICE DETAIL -->
+    <div class="service-detail-hero">
+        <div class="container">
+            <a href="../services.html" class="back-link">← Back to Services</a>
+            <p class="section-label">Fashion Photography</p>
+            <h1>Stunning Fashion Shots</h1>
+            <p class="service-detail-desc">Professional fashion photography for magazines, brands, and editorial
+                use.</p>
+            <div class="service-detail-price">€500 – €1,200</div>
+            <button class="book-now-btn" onclick="openModal()">Book Now</button>
+        </div>
+    </div>
+
+    <!-- IMAGE SLIDER -->
+    <div class="slider-section">
+        <div class="container">
+            <div class="slider-wrapper">
+
+                <div class="slider-main">
+                    <button class="slider-btn slider-prev" onclick="changeSlide(-1)">&#8592;</button>
+                    <div class="slider-img-wrap">
+                        <img id="slider-img" src="../../images/services/fashion1.jpg" alt="Fashion Photography">
+                    </div>
+                    <button class="slider-btn slider-next" onclick="changeSlide(1)">&#8594;</button>
+                </div>
+
+                <div class="slider-counter">
+                    <span id="slider-current">1</span> / <span id="slider-total">6</span>
+                </div>
+
+                <div class="slider-thumbs">
+                    <div class="thumb active" onclick="goToSlide(0)">
+                        <img src="../../images/services/fashion1.jpg" alt="">
+                    </div>
+                    <div class="thumb" onclick="goToSlide(1)">
+                        <img src="../../images/services/fashion2.jpg" alt="">
+                    </div>
+                    <div class="thumb" onclick="goToSlide(2)">
+                        <img src="../../images/services/fashion3.jpg" alt="">
+                    </div>
+                    <div class="thumb" onclick="goToSlide(3)">
+                        <img src="../../images/services/fashion4.jpg" alt="">
+                    </div>
+                    <div class="thumb" onclick="goToSlide(4)">
+                        <img src="../../images/services/fashion5.jpg" alt="">
+                    </div>
+                    <div class="thumb" onclick="goToSlide(5)">
+                        <img src="../../images/services/fashion6.jpg" alt="">
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- BOOKING MODAL -->
+    <div id="booking-modal" class="modal-overlay" style="display:none">
+        <div class="modal-box">
+
+            <button class="modal-close" onclick="closeModal()">×</button>
+            <h2>Book Fashion Photography</h2>
+            <p>Fill in your details and complete payment to confirm.</p>
+
+            <div class="modal-body">
+                <div class="modal-left">
+
+                    <div class="form-group">
+                        <label>Your Name</label>
+                        <input type="text" id="booking-name" class="text-input" placeholder="Enter your name">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Your Email</label>
+                        <input type="email" id="booking-email" class="text-input" placeholder="Enter your email">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Select Date</label>
+                        <input type="date" id="booking-date" class="date-input">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Select Package</label>
+                        <select id="booking-package" class="select-input" onchange="updatePrice()">
+                            <option value="500">Basic – 2 hours (€500)</option>
+                            <option value="1000">Standard – 4 hours (€1,000)</option>
+                            <option value="1200">Full Coverage – 8 hours (€1,200)</option>
+                        </select>
+                    </div>
+
+                    <div class="price-display">
+                        Total: <span id="total-price">€500</span>
+                    </div>
+
+                </div>
+
+                <div class="modal-right">
+                    <p class="payment-label">Complete Payment</p>
+                    <div id="paypal-button-container"></div>
+                    <div id="booking-success" class="booking-success" style="display:none">
+                        Booking confirmed! You will receive an email shortly.
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="footer">
+        <div class="container">
+            <p>© 2026 Arpith Binsa. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script>
+        // SLIDER
+        const images = [
+            '../../images/services/fashion1.jpg',
+            '../../images/services/fashion2.jpg',
+            '../../images/services/fashion3.jpg',
+            '../../images/services/fashion4.jpg',
+            '../../images/services/fashion5.jpg',
+            '../../images/services/fashion6.jpg'
+        ];
+
+        let current = 0;
+
+        function changeSlide(direction) {
+            current = (current + direction + images.length) % images.length;
+            updateSlider();
+        }
+
+        function goToSlide(index) {
+            current = index;
+            updateSlider();
+        }
+
+        function updateSlider() {
+            document.getElementById('slider-img').src = images[current];
+            document.getElementById('slider-current').textContent = current + 1;
+            document.querySelectorAll('.thumb').forEach((t, i) => {
+                t.classList.toggle('active', i === current);
+            });
+        }
+
+        // MODAL
+        function openModal() {
+            document.getElementById('booking-modal').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            document.getElementById('booking-modal').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        // close modal if clicking outside
+        document.getElementById('booking-modal').addEventListener('click', function (e) {
+            if (e.target === this) closeModal();
+        });
+
+        // PRICE UPDATE
+        function updatePrice() {
+            const price = document.getElementById('booking-package').value;
+            document.getElementById('total-price').textContent = '€' + price;
+        }
+
+        // FORM VALIDATION
+        function validateForm() {
+            const date = document.getElementById('booking-date').value;
+            const name = document.getElementById('booking-name').value;
+            const email = document.getElementById('booking-email').value;
+            if (!date || !name || !email) {
+                alert('Please fill in all fields before paying.');
+                return false;
+            }
+            return true;
+        }
+
+        // PAYPAL
+        paypal.Buttons({
+            createOrder: function (data, actions) {
+                if (!validateForm()) return;
+                const price = document.getElementById('booking-package').value;
+                return actions.order.create({
+                    purchase_units: [{
+                        amount: {
+                            value: price,
+                            currency_code: 'EUR'
+                        },
+                        description: 'Fashion Photography Booking – Arpith Binsa'
+                    }]
+                });
+            },
+            onApprove: function (data, actions) {
+                return actions.order.capture().then(function (details) {
+                    document.getElementById('paypal-button-container').style.display = 'none';
+                    document.getElementById('booking-success').style.display = 'block';
+                });
+            },
+            onError: function (err) {
+                alert('Payment failed. Please try again.');
+            }
+        }).render('#paypal-button-container');
+    </script>
+
+</body>
+
+</html>

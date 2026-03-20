@@ -4,9 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <title>Sports Photography – Arpith Binsa</title>
-    <link rel="stylesheet" href="../style.css">
-    <!-- PayPal SDK -->
-    <script src="https://www.paypal.com/sdk/js?client-id=YOUR_CLIENT_ID&currency=EUR"></script>
+    <link rel="stylesheet" href="../../style.css">
+    <script src="https://www.paypal.com/sdk/js?client-id=ATLGa7p3a7o8yrpzlIlDmOSI8cPnZT_QyID5ajjYTfxYumjay_QUZwrlmmWBUJ6XWutoZUwi2VUcJswe&currency=EUR"></script>
 </head>
 
 <body>
@@ -14,67 +13,96 @@
     <div class="navbar">
         <div class="container nav-container">
             <div class="logo">
-                <img src="../images/favicon (1) (1).png" alt="Logo" width="50px">
+                <img src="../../images/favicon (1) (1).png" alt="Logo" width="50px">
                 <span>Arpith Binsa</span>
             </div>
             <nav>
                 <ul class="nav-links">
-                    <li><a href="../index.html">Home</a></li>
-                    <li><a href="services.html" class="active">Services</a></li>
-                    <li><a href="products.html">Products</a></li>
-                    <li><a href="contact.html">Contact</a></li>
-                    <li><a href="account.html" class="btn-nav">Account</a></li>
+                    <li><a href="../../index.html">Home</a></li>
+                    <li><a href="../services.html" class="active">Services</a></li>
+                    <li><a href="../products.html">Products</a></li>
+                    <li><a href="../contact.html">Contact</a></li>
+                    <li><a href="../account.html" class="btn-nav">Account</a></li>
                 </ul>
             </nav>
         </div>
     </div>
 
-    <!-- SERVICE HERO -->
+    <!-- SERVICE DETAIL -->
     <div class="service-detail-hero">
         <div class="container">
-            <a href="services.html" class="back-link">← Back to Services</a>
+            <a href="../services.html" class="back-link">← Back to Services</a>
             <p class="section-label">Sports Photography</p>
             <h1>Football & Action</h1>
             <p class="service-detail-desc">Raw intensity and passion captured at the perfect moment. Available for
                 matches, training sessions and sporting events across Berlin and beyond.</p>
             <div class="service-detail-price">€200 – €500</div>
+            <button class="book-now-btn" onclick="openModal()">Book Now</button>
         </div>
     </div>
 
-    <!-- IMAGE GRID -->
-    <div class="service-gallery">
+    <!-- IMAGE SLIDER -->
+    <div class="slider-section">
         <div class="container">
-            <div class="gallery-grid">
-                <div class="gallery-img-wrap">
-                    <img src="../images/services/football.jpg" alt="Sports Photography">
+            <div class="slider-wrapper">
+
+                <div class="slider-main">
+                    <button class="slider-btn slider-prev" onclick="changeSlide(-1)">&#8592;</button>
+                    <div class="slider-img-wrap">
+                        <img id="slider-img" src="../../images/services/football1.jpg" alt="Sports Photography">
+                    </div>
+                    <button class="slider-btn slider-next" onclick="changeSlide(1)">&#8594;</button>
                 </div>
-                <div class="gallery-img-wrap">
-                    <img src="../images/services/football2.jpg" alt="Sports Photography">
+
+                <div class="slider-counter">
+                    <span id="slider-current">1</span> / <span id="slider-total">6</span>
                 </div>
-                <div class="gallery-img-wrap">
-                    <img src="../images/services/football3.jpg" alt="Sports Photography">
+
+                <div class="slider-thumbs">
+                    <div class="thumb active" onclick="goToSlide(0)">
+                        <img src="../../images/services/football1.jpg" alt="">
+                    </div>
+                    <div class="thumb" onclick="goToSlide(1)">
+                        <img src="../../images/services/football2.jpg" alt="">
+                    </div>
+                    <div class="thumb" onclick="goToSlide(2)">
+                        <img src="../../images/services/football3.jpg" alt="">
+                    </div>
+                    <div class="thumb" onclick="goToSlide(3)">
+                        <img src="../../images/services/football4.jpg" alt="">
+                    </div>
+                    <div class="thumb" onclick="goToSlide(4)">
+                        <img src="../../images/services/football5.jpg" alt="">
+                    </div>
+                    <div class="thumb" onclick="goToSlide(5)">
+                        <img src="../../images/services/football6.jpg" alt="">
+                    </div>
                 </div>
-                <div class="gallery-img-wrap">
-                    <img src="../images/services/football4.jpg" alt="Sports Photography">
-                </div>
-                <div class="gallery-img-wrap">
-                    <img src="../images/services/football5.jpg" alt="Sports Photography">
-                </div>
-                <div class="gallery-img-wrap">
-                    <img src="../images/services/football6.jpg" alt="Sports Photography">
-                </div>
+
             </div>
         </div>
     </div>
 
-    <!-- BOOKING + PAYMENT -->
-    <div class="booking-section">
-        <div class="container">
-            <div class="booking-box">
+    <!-- BOOKING MODAL -->
+    <div id="booking-modal" class="modal-overlay" style="display:none">
+        <div class="modal-box">
 
-                <div class="booking-left">
-                    <h2>Book This Service</h2>
-                    <p>Select a date and complete payment to confirm your booking.</p>
+            <button class="modal-close" onclick="closeModal()">×</button>
+            <h2>Book Sports Photography</h2>
+            <p>Fill in your details and complete payment to confirm.</p>
+
+            <div class="modal-body">
+                <div class="modal-left">
+
+                    <div class="form-group">
+                        <label>Your Name</label>
+                        <input type="text" id="booking-name" class="text-input" placeholder="Enter your name">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Your Email</label>
+                        <input type="email" id="booking-email" class="text-input" placeholder="Enter your email">
+                    </div>
 
                     <div class="form-group">
                         <label>Select Date</label>
@@ -90,31 +118,21 @@
                         </select>
                     </div>
 
-                    <div class="form-group">
-                        <label>Your Name</label>
-                        <input type="text" id="booking-name" class="text-input" placeholder="Enter your name">
-                    </div>
-
-                    <div class="form-group">
-                        <label>Your Email</label>
-                        <input type="email" id="booking-email" class="text-input" placeholder="Enter your email">
-                    </div>
-
                     <div class="price-display">
                         Total: <span id="total-price">€200</span>
                     </div>
+
                 </div>
 
-                <div class="booking-right">
-                    <h2>Complete Payment</h2>
-                    <p>Secure payment via PayPal sandbox.</p>
+                <div class="modal-right">
+                    <p class="payment-label">Complete Payment</p>
                     <div id="paypal-button-container"></div>
                     <div id="booking-success" class="booking-success" style="display:none">
-                        Booking confirmed! Check your email for details.
+                        Booking confirmed! You will receive an email shortly.
                     </div>
                 </div>
-
             </div>
+
         </div>
     </div>
 
@@ -125,11 +143,59 @@
     </div>
 
     <script>
+        // SLIDER
+        const images = [
+            '../../images/services/football1.jpg',
+            '../../images/services/football2.jpg',
+            '../../images/services/football3.jpg',
+            '../../images/services/football4.jpg',
+            '../../images/services/football5.jpg',
+            '../../images/services/football6.jpg'
+        ];
+
+        let current = 0;
+
+        function changeSlide(direction) {
+            current = (current + direction + images.length) % images.length;
+            updateSlider();
+        }
+
+        function goToSlide(index) {
+            current = index;
+            updateSlider();
+        }
+
+        function updateSlider() {
+            document.getElementById('slider-img').src = images[current];
+            document.getElementById('slider-current').textContent = current + 1;
+            document.querySelectorAll('.thumb').forEach((t, i) => {
+                t.classList.toggle('active', i === current);
+            });
+        }
+
+        // MODAL
+        function openModal() {
+            document.getElementById('booking-modal').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            document.getElementById('booking-modal').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        // close modal if clicking outside
+        document.getElementById('booking-modal').addEventListener('click', function (e) {
+            if (e.target === this) closeModal();
+        });
+
+        // PRICE UPDATE
         function updatePrice() {
             const price = document.getElementById('booking-package').value;
             document.getElementById('total-price').textContent = '€' + price;
         }
 
+        // FORM VALIDATION
         function validateForm() {
             const date = document.getElementById('booking-date').value;
             const name = document.getElementById('booking-name').value;
@@ -141,6 +207,7 @@
             return true;
         }
 
+        // PAYPAL
         paypal.Buttons({
             createOrder: function (data, actions) {
                 if (!validateForm()) return;
@@ -157,7 +224,6 @@
             },
             onApprove: function (data, actions) {
                 return actions.order.capture().then(function (details) {
-                    // Save order to your backend here later
                     document.getElementById('paypal-button-container').style.display = 'none';
                     document.getElementById('booking-success').style.display = 'block';
                 });
