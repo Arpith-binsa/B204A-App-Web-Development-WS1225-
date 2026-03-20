@@ -1117,3 +1117,51 @@ body {
    align-items: center;
    gap: 12px;
 }
+
+/* CART ICON */
+.cart-icon-wrap {
+   position: relative;
+   cursor: pointer;
+   text-decoration: none;
+}
+
+.cart-icon {
+   font-size: 20px;
+   color: #111;
+   display: flex;
+   align-items: center;
+}
+
+.cart-count {
+   position: absolute;
+   top: -8px;
+   right: -8px;
+   background: #111;
+   color: #fff;
+   font-size: 10px;
+   font-weight: 700;
+   width: 18px;
+   height: 18px;
+   border-radius: 50%;
+   display: none;
+   align-items: center;
+   justify-content: center;
+}
+
+/* CART FEEDBACK TOAST */
+#cart-feedback {
+   position: fixed;
+   top: 90px;
+   right: 30px;
+   background: #111;
+   color: #fff;
+   padding: 12px 20px;
+   border-radius: 10px;
+   font-size: 13px;
+   font-weight: 600;
+   z-index: 9999;
+   opacity: 0;
+   transform: translateY(-10px);
+   transition: all 0.3s;
+   pointer-events: none;
+}

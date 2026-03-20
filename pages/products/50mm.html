@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Sony A7 III – Arpith Binsa</title>
+    <title>Sony SEL 50F18F – Arpith Binsa</title>
     <link rel="stylesheet" href="../../style.css">
     <script src="https://www.paypal.com/sdk/js?client-id=YOUR_CLIENT_ID&currency=EUR"></script>
     <script src="../../cart.js"></script>
@@ -45,7 +45,7 @@
                     <div class="slider-main">
                         <button class="slider-btn slider-prev" onclick="changeSlide(-1)">&#8592;</button>
                         <div class="slider-img-wrap">
-                            <img id="slider-img" src="../../images/products/a7m3_1.jpg" alt="Sony A7 III">
+                            <img id="slider-img" src="../../images/products/50mm_1.jpg" alt="Sony SEL 50F18F">
                         </div>
                         <button class="slider-btn slider-next" onclick="changeSlide(1)">&#8594;</button>
                     </div>
@@ -56,16 +56,16 @@
 
                     <div class="slider-thumbs">
                         <div class="thumb active" onclick="goToSlide(0)">
-                            <img src="../../images/products/a7m3_1.jpg" alt="">
+                            <img src="../../images/products/50mm_1.jpg" alt="">
                         </div>
                         <div class="thumb" onclick="goToSlide(1)">
-                            <img src="../../images/products/a7m3_2.jpg" alt="">
+                            <img src="../../images/products/50mm_2.jpg" alt="">
                         </div>
                         <div class="thumb" onclick="goToSlide(2)">
-                            <img src="../../images/products/a7m3_3.jpg" alt="">
+                            <img src="../../images/products/50mm_3.jpg" alt="">
                         </div>
                         <div class="thumb" onclick="goToSlide(3)">
-                            <img src="../../images/products/a7m3_4.jpg" alt="">
+                            <img src="../../images/products/50mm_4.jpg" alt="">
                         </div>
                     </div>
                 </div>
@@ -73,39 +73,39 @@
                 <!-- RIGHT — PRODUCT INFO -->
                 <div class="product-detail-right">
 
-                    <span class="product-tag">Camera Body</span>
-                    <h1 class="product-detail-title">Sony A7 III</h1>
-                    <p class="product-detail-sub">Full-frame mirrorless camera — my primary shooting body.</p>
+                    <span class="product-tag">Prime Lens</span>
+                    <h1 class="product-detail-title">Sony 50F18F </h1>
+                    <p class="product-detail-sub">Sony 50mm f1.8, full frame Prime Lens</p>
 
-                    <div class="product-detail-price">€1,299</div>
+                    <div class="product-detail-price">€179</div>
 
                     <!-- SPECS — fill these in yourself -->
                     <div class="product-specs">
                         <h3>Technical Details</h3>
                         <table class="specs-table">
                             <tr>
-                                <td>Sensor</td>
-                                <td>24.2MP Full-Frame BSI CMOS</td>
+                                <td>Brand</td>
+                                <td>Sony</td>
                             </tr>
                             <tr>
-                                <td>ISO Range</td>
-                                <td>100 – 51200</td>
+                                <td>Zoom Range</td>
+                                <td>50mm Fixed</td>
+                            </tr>
+                            <tr>
+                                <td>Aperture</td>
+                                <td>f/1.8, Great for Bokeh and Low Light</td>
+                            </tr>
+                            <tr>
+                                <td>Mount</td>
+                                <td>Sony E-Mount</td>
                             </tr>
                             <tr>
                                 <td>Autofocus</td>
-                                <td>693 Phase-detect points</td>
-                            </tr>
-                            <tr>
-                                <td>Video</td>
-                                <td>4K 30fps</td>
-                            </tr>
-                            <tr>
-                                <td>Battery Life</td>
-                                <td>~710 shots</td>
+                                <td>Sony DC Motor</td>
                             </tr>
                             <tr>
                                 <td>Weight</td>
-                                <td>650g</td>
+                                <td>186g</td>
                             </tr>
                         </table>
                     </div>
@@ -145,10 +145,10 @@
     <script>
         // SLIDER
         const images = [
-            '../../images/products/a7m3_1.jpg',
-            '../../images/products/a7m3_2.jpg',
-            '../../images/products/a7m3_3.jpg',
-            '../../images/products/a7m3_4.jpg'
+            '../../images/products/50mm_1.jpg',
+            '../../images/products/50mm_2.jpg',
+            '../../images/products/50mm_3.jpg',
+            '../../images/products/50mm_4.jpg'
         ];
 
         let current = 0;
@@ -173,7 +173,7 @@
 
         // QUANTITY
         let qty = 1;
-        const price = 1299;
+        const price = 179;
 
         function changeQty(direction) {
             qty = Math.max(1, qty + direction);
@@ -181,9 +181,10 @@
         }
 
         // ADD TO CART — connect to backend later
-        function addToCart() {
-            alert(`${qty} x Sony A7 III added to cart!`);
-        }
+        <button class="btn-add-cart"
+                onclick="addToCart('50mm', 'Sony 50mm f1.8', 179, '../../images/products/50mm_1.jpg')">
+                Add to Cart
+            </button>
 
         // PAYPAL — Buy Now
         paypal.Buttons({
@@ -194,7 +195,7 @@
                             value: (price * qty).toString(),
                             currency_code: 'EUR'
                         },
-                        description: `Sony A7 III x${qty} – Arpith Binsa`
+                        description: `Sony SEL 50F18F x${qty} – Arpith Binsa`
                     }]
                 });
             },
