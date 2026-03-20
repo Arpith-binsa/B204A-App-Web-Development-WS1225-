@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Cart – Arpith Binsa</title>
+    <link rel="stylesheet" href="../style.css">
+    <script src="../cart.js" defer></script>
+    <script src="https://www.paypal.com/sdk/js?client-id=ATLGa7p3a7o8yrpzlIlDmOSI8cPnZT_QyID5ajjYTfxYumjay_QUZwrlmmWBUJ6XWutoZUwi2VUcJswe&currency=EUR"></script>
+</head>
+
+<body>
+
+    <div id="cart-feedback">Added to cart!</div>
+
+    <div class="navbar">
+        <div class="container nav-container">
+            <div class="logo">
+                <img src="../images/favicon (1) (1).png" alt="Logo" width="50px">
+                <span>Arpith Binsa</span>
+            </div>
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="../index.html">Home</a></li>
+                    <li><a href="services.html">Services</a></li>
+                    <li><a href="products.html">Products</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                    <li><a href="account.html" class="btn-nav">Account</a></li>
+                    <li>
+                        <a href="cart.html" class="cart-icon-wrap">
+                            <span class="cart-icon">🛒</span>
+                            <span class="cart-count">0</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+
+    <div class="cart-page">
+        <div class="container">
+            <div class="page-hero" style="padding: 140px 0 40px">
+                <p class="section-label">Your Selection</p>
+                <h1>Cart</h1>
+            </div>
+
+            <div class="cart-layout">
+
+                <!-- CART ITEMS -->
+                <div class="cart-items" id="cart-items">
+                    <!-- filled by JS -->
+                </div>
+
+                <!-- ORDER SUMMARY -->
+                <div class="cart-summary-box">
+                    <h2>Order Summary</h2>
+
+                    <div class="summary-row">
+                        <span>Items</span>
+                        <span id="summary-count">0</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Subtotal</span>
+                        <span id="summary-subtotal">€0</span>
+                    </div>
+                    <div class="summary-row summary-total">
+                        <span>Total</span>
+                        <span id="summary-total">€0</span>
+                    </div>
+
+                    <div id="paypal-button-container"></div>
+
+                    <button class="btn-clear-cart" onclick="clearCart(); renderCart();">
+                        Clear Cart
+                    </button>
+
+                    <div id="order-success" class="booking-success" style="display:none">
+                        Order confirmed! You will receive an email shortly.
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- EMPTY STATE -->
+            <div id="cart-empty" style="display:none">
+                <div class="cart-empty-box">
+                    <p>Your cart is empty.</p>
+                    <a href="products.html" class="btn-primary"
+                        style="background:#111; color:#fff; margin-top:16px; display:inline-block">
+                        Browse Products
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="footer">
+        <div class="container">
+            <p>© 2026 Arpith Binsa. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script>
+        function renderCart() {
+            const cart = getCart();
+            const items = Object.values(cart);
+            const container = document.getElementById('cart-items');
+            const emptyState = document.getElementById('cart-empty');
+            const cartLayout = document.querySelector('.cart-layout');
+
+            if (items.length === 0) {
+                cartLayout.style.display = 'none';
+                emptyState.style.display = 'block';
+                return;
+            }
+
+            cartLayout.style.display = 'grid';
+            emptyState.style.display = 'none';
+
+            container.innerHTML = items.map(item => `
+                <div class="cart-item" id="item-${item.id}">
+                    <div class="cart-item-img">
+                        <img src="${item.image}" alt="${item.name}">
+                    </div>
+                    <div class="cart-item-info">
+                        <h3>${item.name}</h3>
+                        <p class="cart-item-price">€${item.price.toLocaleString()}</p>
+                        <div class="quantity-control" style="margin-top: 12px">
+                            <button onclick="changeItemQty('${item.id}', ${item.qty - 1})">−</button>
+                            <span>${item.qty}</span>
+                            <button onclick="changeItemQty('${item.id}', ${item.qty + 1})">+</button>
+                        </div>
+                    </div>
+                    <div class="cart-item-right">
+                        <p class="cart-item-total">€${(item.price * item.qty).toLocaleString()}</p>
+                        <button class="cart-remove" onclick="removeItem('${item.id}')">Remove</button>
+                    </div>
+                </div>
+            `).join('');
+
+            updateSummary();
+            renderPayPal();
+        }
+
+        function changeItemQty(id, newQty) {
+            updateQty(id, newQty);
+            renderCart();
+        }
+
+        function removeItem(id) {
+            removeFromCart(id);
+            renderCart();
+        }
+
+        function updateSummary() {
+            const cart = getCart();
+            const count = getCartCount();
+            const total = getCartTotal();
+            document.getElementById('summary-count').textContent = count;
+            document.getElementById('summary-subtotal').textContent = '€' + total.toLocaleString();
+            document.getElementById('summary-total').textContent = '€' + total.toLocaleString();
+        }
+
+        let paypalRendered = false;
+
+        function renderPayPal() {
+            if (paypalRendered) return;
+            paypalRendered = true;
+
+            paypal.Buttons({
+                createOrder: function (data, actions) {
+                    const total = getCartTotal();
+                    const cart = getCart();
+                    const itemList = Object.values(cart)
+                        .map(i => `${i.name} x${i.qty}`)
+                        .join(', ');
+
+                    return actions.order.create({
+                        purchase_units: [{
+                            amount: {
+                                value: total.toString(),
+                                currency_code: 'EUR'
+                            },
+                            description: itemList
+                        }]
+                    });
+                },
+                onApprove: function (data, actions) {
+                    return actions.order.capture().then(function (details) {
+                        clearCart();
+                        document.getElementById('paypal-button-container').style.display = 'none';
+                        document.getElementById('order-success').style.display = 'block';
+                        document.getElementById('cart-items').style.display = 'none';
+                    });
+                },
+                onError: function (err) {
+                    alert('Payment failed. Please try again.');
+                },
+                style: {
+                    color: 'gold',
+                    shape: 'pill',
+                    label: 'buynow',
+                    height: 50
+                }
+            }).render('#paypal-button-container');
+        }
+
+        document.addEventListener('DOMContentLoaded', renderCart);
+    </script>
+
+</body>
+
+</html>
