@@ -122,7 +122,9 @@
                             </div>
                         </div>
 
-                        <button class="btn-add-cart" onclick="addToCart()">Add to Cart</button>
+                        <button class="btn-add-cart" onclick="addToCart('50mm', 'Sony 50mm f1.8', 179, '../../images/products/50mm_1.jpg')">
+                            Add to Cart
+                        </button>
                         <div id="paypal-button-container"></div>
 
                         <div id="order-success" class="booking-success" style="display:none">
@@ -144,76 +146,72 @@
 
     <script>
         // SLIDER
-        const images = [
-            '../../images/products/50mm_1.jpg',
-            '../../images/products/50mm_2.jpg',
-            '../../images/products/50mm_3.jpg',
-            '../../images/products/50mm_4.jpg'
-        ];
+            const images = [
+                '../../images/products/50mm_1.jpg',
+                '../../images/products/50mm_2.jpg',
+                '../../images/products/50mm_3.jpg',
+                '../../images/products/50mm_4.jpg'
+            ];
 
-        let current = 0;
+            let current = 0;
 
-        function changeSlide(direction) {
-            current = (current + direction + images.length) % images.length;
-            updateSlider();
-        }
+            function changeSlide(direction) {
+                current = (current + direction + images.length) % images.length;
+                updateSlider();
+            }
 
-        function goToSlide(index) {
-            current = index;
-            updateSlider();
-        }
+            function goToSlide(index) {
+                current = index;
+                updateSlider();
+            }
 
-        function updateSlider() {
-            document.getElementById('slider-img').src = images[current];
-            document.getElementById('slider-current').textContent = current + 1;
-            document.querySelectorAll('.thumb').forEach((t, i) => {
-                t.classList.toggle('active', i === current);
-            });
-        }
+            function updateSlider() {
+                document.getElementById('slider-img').src = images[current];
+                document.getElementById('slider-current').textContent = current + 1;
+                document.querySelectorAll('.thumb').forEach((t, i) => {
+                    t.classList.toggle('active', i === current);
+                });
+            }
 
-        // QUANTITY
-        let localQty = 1;
+            // QUANTITY
+            let localQty = 1;
+            const price = 179;
 
             function changeQty(direction) {
                 localQty = Math.max(1, localQty + direction);
                 document.getElementById('qty').textContent = localQty;
             }
 
-        // ADD TO CART — connect to backend later
-        <button class="btn-add-cart"
-                onclick="addToCart('50mm', 'Sony 50mm f1.8', 179, '../../images/products/50mm_1.jpg')">
-                Add to Cart
-            </button>
-
-        // PAYPAL — Buy Now
-        paypal.Buttons({
-            createOrder: function (data, actions) {
-                return actions.order.create({
-                    purchase_units: [{
-                        amount: {
-                            value: (price * localQty).toString(),
-                            currency_code: 'EUR'
-                        },
-                        description: `Sony SEL 50F18F x${localQty} – Arpith Binsa`
-                    }]
-                });
-            },
-            onApprove: function (data, actions) {
-                return actions.order.capture().then(function (details) {
-                    document.getElementById('paypal-button-container').style.display = 'none';
-                    document.getElementById('order-success').style.display = 'block';
-                });
-            },
-            onError: function (err) {
-                alert('Payment failed. Please try again.');
-            },
-            style: {
-                color: 'gold',
-                shape: 'pill',
-                label: 'buynow',
-                height: 50
-            }
-        }).render('#paypal-button-container');
+            // PAYPAL
+            paypal.Buttons({
+                createOrder: function (data, actions) {
+                    return actions.order.create({
+                        purchase_units: [{
+                            amount: {
+                                value: (price * localQty).toString(),
+                                currency_code: 'EUR'
+                            },
+                            description: `Sony SEL 50F18F x${localQty} – Arpith Binsa`
+                        }]
+                    });
+                },
+                onApprove: function (data, actions) {
+                    return actions.order.capture().then(function (details) {
+                        document.getElementById('paypal-button-container').style.display = 'none';
+                        document.getElementById('order-success').style.display = 'block';
+                    });
+                },
+                onError: function (err) {
+                    alert('Payment failed. Please try again.');
+                },
+                style: {
+                    color: 'gold',
+                    shape: 'pill',
+                    label: 'buynow',
+                    height: 50
+                }
+            }).render('#paypal-button-container');
+        
     </script>
 
 </body>
