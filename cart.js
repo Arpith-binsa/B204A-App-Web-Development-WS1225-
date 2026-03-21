@@ -10,10 +10,14 @@ function saveCart(cart) {
 
 function addToCart(id, name, price, image) {
     const cart = getCart();
+    
+    // strip any leading ../ so path is always relative to root
+    const cleanImage = image.replace(/^(\.\.\/)+/, '');
+    
     if (cart[id]) {
         cart[id].qty += 1;
     } else {
-        cart[id] = { id, name, price, image, qty: 1 };
+        cart[id] = { id, name, price, image: cleanImage, qty: 1 };
     }
     saveCart(cart);
     updateCartCount();
