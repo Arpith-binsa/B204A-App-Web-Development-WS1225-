@@ -117,7 +117,9 @@
                             </div>
                         </div>
 
-                        <button class="btn-add-cart" onclick="addToCart()">Add to Cart</button>
+                        <button class="btn-add-cart" onclick="addToCart('50mm', 'Sony 50mm f1.8', 179, '../../images/products/50mm_1.jpg')">
+                            Add to Cart
+                        </button>
                         <div id="paypal-button-container"></div>
 
                         <div id="order-success" class="booking-success" style="display:none">
@@ -168,17 +170,12 @@
 
         // QUANTITY
         let localQty = 1;
+        const price = 1548;
 
             function changeQty(direction) {
                 localQty = Math.max(1, localQty + direction);
                 document.getElementById('qty').textContent = localQty;
             }
-
-        // ADD TO CART — connect to backend later
-        <button class="btn-add-cart"
-                onclick="addToCart('200600', 'Sony 200mm f2.8', 1548, '../../images/products/200600_1.jpg')">
-                Add to Cart
-            </button>
 
         // PAYPAL — Buy Now
         paypal.Buttons({
