@@ -5,7 +5,6 @@
     <meta charset="UTF-8">
     <title>Products – Arpith Binsa</title>
     <link rel="stylesheet" href="../style.css">
-    <script src="https://www.paypal.com/sdk/js?client-id=ATLGa7p3a7o8yrpzlIlDmOSI8cPnZT_QyID5ajjYTfxYumjay_QUZwrlmmWBUJ6XWutoZUwi2VUcJswe&currency=EUR"></script>
     <script src="../cart.js"></script>
 </head>
 
@@ -26,9 +25,9 @@
                     <li><a href="contact.html">Contact</a></li>
                     <li><a href="account.html" class="btn-nav">Account</a></li>
                     <li><a href="cart.html" class="cart-icon-wrap">
-                        <span class="cart-icon">🛒</span>
-                        <span class="cart-count">0</span>
-                    </a></li>
+                            <span class="cart-icon">🛒</span>
+                            <span class="cart-count">0</span>
+                        </a></li>
                 </ul>
             </nav>
         </div>
@@ -41,221 +40,30 @@
         </div>
     </div>
 
-    <!-- CART BAR -->
-    <div class="cart-bar" id="cart-bar" style="display:none">
-        <div class="container cart-bar-inner">
-            <span id="cart-summary">0 items in cart</span>
-            <div class="cart-bar-right">
-                <span id="cart-total">€0</span>
-                <button class="btn-checkout" onclick="checkout()">Checkout</button>
-                <button class="btn-clear-cart" onclick="clearCart()">Clear</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- FILTER TABS -->
     <div class="products-page">
         <div class="container">
 
-            <div class="filter-tabs">
-                <button class="filter-btn active" onclick="filterProducts('all', this)">All</button>
-                <button class="filter-btn" onclick="filterProducts('camera', this)">Cameras</button>
-                <button class="filter-btn" onclick="filterProducts('lens', this)">Lenses</button>
-                <button class="filter-btn" onclick="filterProducts('stabiliser', this)">Stabilisers</button>
-                <button class="filter-btn" onclick="filterProducts('bag', this)">Bags</button>
-                <button class="filter-btn" onclick="filterProducts('accessory', this)">Accessories</button>
+            <div class="products-controls">
+                <div class="search-wrap">
+                    <input type="text" id="search-input" class="text-input search-input"
+                        placeholder="Search products..." oninput="handleSearch()">
+                </div>
+                <div class="filter-tabs">
+                    <button class="filter-btn active" onclick="filterProducts('all', this)">All</button>
+                    <button class="filter-btn" onclick="filterProducts('camera', this)">Cameras</button>
+                    <button class="filter-btn" onclick="filterProducts('lens', this)">Lenses</button>
+                    <button class="filter-btn" onclick="filterProducts('stabiliser', this)">Stabilisers</button>
+                    <button class="filter-btn" onclick="filterProducts('bag', this)">Bags</button>
+                    <button class="filter-btn" onclick="filterProducts('accessory', this)">Accessories</button>
+                </div>
             </div>
 
-            <div class="products-listing" id="products-listing">
-
-                <!-- CAMERAS -->
-                <div class="product-listing-card" data-category="camera">
-                    <a href="products/a7m3.html" class="product-listing-img-wrap">
-                        <img src="../images/products/a7m3_1.jpg" alt="Sony A7 III">
-                    </a>
-                    <div class="product-listing-info">
-                        <span class="product-tag">Camera Body</span>
-                        <a href="products/a7m3.html">
-                            <h3>Sony A7 III</h3>
-                        </a>
-                        <p>Full-frame mirrorless. My primary shooting body for everything from sports to portraits.</p>
-                        <div class="product-listing-bottom">
-                            <span class="product-listing-price">€1,299</span>
-                            <div class="qty-add">
-                                <div class="quantity-control">
-                                    <button onclick="changeQty('a7m3', -1)">−</button>
-                                    <span id="qty-a7m3">1</span>
-                                    <button onclick="changeQty('a7m3', 1)">+</button>
-                                </div>
-                                <button class="btn-add-cart"
-                                    onclick="addToCart('a7m3', 'Sony A7 III', 1299, 'images/products/a7m3_1.jpg', parseInt(document.getElementById('qty-a7m3').textContent))">Add
-                                    to Cart</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- LENSES -->
-                <div class="product-listing-card" data-category="lens">
-                    <a href="products/200600.html" class="product-listing-img-wrap">
-                        <img src="../images/products/200600_1.jpg" alt="Sony 200-600mm G">
-                    </a>
-                    <div class="product-listing-info">
-                        <span class="product-tag">Lens</span>
-                        <a href="products/200600.html">
-                            <h3>Sony 200-600mm G</h3>
-                        </a>
-                        <p>My go-to for sports and action. Reaches far without losing sharpness.</p>
-                        <div class="product-listing-bottom">
-                            <span class="product-listing-price">€2,499</span>
-                            <div class="qty-add">
-                                <div class="quantity-control">
-                                    <button onclick="changeQty('200600', -1)">−</button>
-                                    <span id="qty-200600">1</span>
-                                    <button onclick="changeQty('200600', 1)">+</button>
-                                </div>
-                                <button class="btn-add-cart"
-                                    onclick="addToCart('200600', 'Sony 200-600mm G', 2499, 'images/products/200600_1.jpg', parseInt(document.getElementById('qty-200600').textContent))">Add
-                                    to Cart</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="product-listing-card" data-category="lens">
-                    <a href="products/50mm.html" class="product-listing-img-wrap">
-                        <img src="../images/products/50mm_1.jpg" alt="Sony 50mm f1.8">
-                    </a>
-                    <div class="product-listing-info">
-                        <span class="product-tag">Lens</span>
-                        <a href="products/50mm.html">
-                            <h3>Sony 50mm f1.8</h3>
-                        </a>
-                        <p>Lightweight and sharp. Perfect for portraits, fashion and everyday shooting.</p>
-                        <div class="product-listing-bottom">
-                            <span class="product-listing-price">€249</span>
-                            <div class="qty-add">
-                                <div class="quantity-control">
-                                    <button onclick="changeQty('50mm', -1)">−</button>
-                                    <span id="qty-50mm">1</span>
-                                    <button onclick="changeQty('50mm', 1)">+</button>
-                                </div>
-                                <button class="btn-add-cart"
-                                    onclick="addToCart('50mm', 'Sony 50mm f1.8', 249, 'images/products/50mm_1.jpg', parseInt(document.getElementById('qty-50mm').textContent))">Add
-                                    to Cart</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- STABILISERS -->
-                <div class="product-listing-card" data-category="stabiliser">
-                    <a href="products/dji.html" class="product-listing-img-wrap">
-                        <img src="../images/products/dji_1.jpg" alt="DJI RS3 Mini">
-                    </a>
-                    <div class="product-listing-info">
-                        <span class="product-tag">Stabiliser</span>
-                        <a href="products/dji.html">
-                            <h3>DJI RS3 Mini</h3>
-                        </a>
-                        <p>Compact gimbal that keeps footage buttery smooth without the bulk.</p>
-                        <div class="product-listing-bottom">
-                            <span class="product-listing-price">€299</span>
-                            <div class="qty-add">
-                                <div class="quantity-control">
-                                    <button onclick="changeQty('rs3mini', -1)">−</button>
-                                    <span id="qty-rs3mini">1</span>
-                                    <button onclick="changeQty('rs3mini', 1)">+</button>
-                                </div>
-                                <button class="btn-add-cart"
-                                    onclick="addToCart('rs3mini', 'DJI RS3 Mini', 299, 'images/products/dji_1.jpg', parseInt(document.getElementById('qty-rs3mini').textContent))">Add to
-                                    Cart</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- BAGS -->
-                <div class="product-listing-card" data-category="bag">
-                    <a href="products/kentfaith.html" class="product-listing-img-wrap">
-                        <img src="../images/products/kentfaith_1.jpg" alt="Kentfaith Backpack">
-                    </a>
-                    <div class="product-listing-info">
-                        <span class="product-tag">Bag</span>
-                        <a href="products/kentfaith.html">
-                            <h3>Kentfaith Backpack</h3>
-                        </a>
-                        <p>Carries all my gear comfortably on location. Well built and well organised.</p>
-                        <div class="product-listing-bottom">
-                            <span class="product-listing-price">€89</span>
-                            <div class="qty-add">
-                                <div class="quantity-control">
-                                    <button onclick="changeQty('backpack', -1)">−</button>
-                                    <span id="qty-backpack">1</span>
-                                    <button onclick="changeQty('backpack', 1)">+</button>
-                                </div>
-                                <button class="btn-add-cart"
-                                    onclick="addToCart('backpack', 'Kentfaith Backpack', 89, 'images/products/kentfaith_1.jpg', parseInt(document.getElementById('qty-backpack').textContent))">Add
-                                    to Cart</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ACCESSORIES -->
-                <div class="product-listing-card" data-category="accessory">
-                    <a href="products/sdcard.html" class="product-listing-img-wrap">
-                        <img src="../images/products/sdcard_1.jpg" alt="SD Card">
-                    </a>
-                    <div class="product-listing-info">
-                        <span class="product-tag">Accessory</span>
-                        <a href="products/sdcard.html">
-                            <h3>Sony SF-G 128GB SD Card</h3>
-                        </a>
-                        <p>Fast and reliable. Essential for high speed shooting and 4K video.</p>
-                        <div class="product-listing-bottom">
-                            <span class="product-listing-price">€189</span>
-                            <div class="qty-add">
-                                <div class="quantity-control">
-                                    <button onclick="changeQty('sdcard', -1)">−</button>
-                                    <span id="qty-sdcard">1</span>
-                                    <button onclick="changeQty('sdcard', 1)">+</button>
-                                </div>
-                                <button class="btn-add-cart"
-                                    onclick="addToCart('sdcard', 'Sony SF-G 128GB SD Card', 49, 'images/products/sdcard_1.jpg', parseInt(document.getElementById('qty-sdcard').textContent))">Add
-                                    to Cart</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="product-listing-card" data-category="accessory">
-                    <a href="products/battery.html" class="product-listing-img-wrap">
-                        <img src="../images/products/battery_1.jpg" alt="Sony NP-FZ100 Battery">
-                    </a>
-                    <div class="product-listing-info">
-                        <span class="product-tag">Accessory</span>
-                        <a href="products/battery.html">
-                            <h3>Sony NP-FZ100 Battery</h3>
-                        </a>
-                        <p>Official Sony battery for the A7 series. Always carry a spare on shoots.</p>
-                        <div class="product-listing-bottom">
-                            <span class="product-listing-price">€69</span>
-                            <div class="qty-add">
-                                <div class="quantity-control">
-                                    <button onclick="changeQty('battery', -1)">−</button>
-                                    <span id="qty-battery">1</span>
-                                    <button onclick="changeQty('battery', 1)">+</button>
-                                </div>
-                                <button class="btn-add-cart"
-                                    onclick="addToCart('battery', 'Sony NP-FZ100 Battery', 59, 'images/products/battery_1.jpg', parseInt(document.getElementById('qty-battery').textContent))">Add
-                                    to Cart</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
+            <div id="loading" class="loading-state">Loading products...</div>
+            <div class="products-listing" id="products-listing" style="display:none"></div>
+            <div id="products-empty" class="cart-empty-box" style="display:none">
+                <p>No products found.</p>
             </div>
+
         </div>
     </div>
 
@@ -266,6 +74,97 @@
     </div>
 
     <script>
+        const API = 'http://localhost:3000/api';
+        let allProducts = [];
+        let currentCategory = 'all';
+
+        // MAP PRODUCT NAME TO SPECIFIC HTML PAGE
+        const pageMap = {
+                'Sony A7 III': '/pages/products/a7m3.html',
+                'Sony 200-600mm G': '/pages/products/200600.html',
+                'Sony 50mm f1.8': '/pages/products/50mm.html',
+                'DJI RS3 Mini': '/pages/products/dji.html',
+                'Kentfaith Backpack': '/pages/products/kentfaith.html',
+                'Sony SF-G 128GB SD Card': '/pages/products/sdcard.html',
+                'Sony NP-FZ100 Battery': '/pages/products/battery.html'
+            };
+
+        function goToProduct(id) {
+            const product = allProducts.find(p => p._id === id);
+            if (!product) return;
+            const page = pageMap[product.name];
+            if (page) window.location.href = page;
+        }
+
+        // LOAD PRODUCTS FROM API
+        async function loadProducts(search = '') {
+            const loading = document.getElementById('loading');
+            const listing = document.getElementById('products-listing');
+            const empty = document.getElementById('products-empty');
+
+            loading.style.display = 'block';
+            listing.style.display = 'none';
+            empty.style.display = 'none';
+
+            try {
+                let url = `${API}/products`;
+                const params = [];
+                if (search) params.push(`search=${encodeURIComponent(search)}`);
+                if (currentCategory !== 'all') params.push(`category=${currentCategory}`);
+                if (params.length) url += '?' + params.join('&');
+
+                const res = await fetch(url);
+                const products = await res.json();
+                allProducts = products;
+
+                loading.style.display = 'none';
+
+                if (products.length === 0) {
+                    empty.style.display = 'block';
+                    return;
+                }
+
+                listing.style.display = 'flex';
+                listing.innerHTML = products.map(product => `
+                    <div class="product-listing-card">
+                        <div class="product-listing-img-wrap"
+                            onclick="goToProduct('${product._id}')"
+                            style="cursor:pointer">
+                            <img src="../${product.image}" alt="${product.name}"
+                                onerror="this.src='../images/favicon (1) (1).png'">
+                        </div>
+                        <div class="product-listing-info">
+                            <span class="product-tag">${product.category}</span>
+                            <h3 onclick="goToProduct('${product._id}')"
+                                style="cursor:pointer">${product.name}</h3>
+                            <p>${product.description}</p>
+                            <div class="product-listing-bottom">
+                                <span class="product-listing-price">€${product.price.toLocaleString()}</span>
+                                <div class="qty-add">
+                                    <div class="quantity-control">
+                                        <button onclick="changeQty('${product._id}', -1)">−</button>
+                                        <span id="qty-${product._id}">1</span>
+                                        <button onclick="changeQty('${product._id}', 1)">+</button>
+                                    </div>
+                                    <button class="btn-add-cart"
+                                        onclick="addToCart('${product._id}', '${product.name}', ${product.price}, '${product.image}', parseInt(document.getElementById('qty-${product._id}').textContent))">
+                                        Add to Cart
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+
+            } catch (err) {
+                loading.style.display = 'none';
+                empty.style.display = 'block';
+                document.querySelector('#products-empty p').textContent =
+                    'Failed to load products. Is the server running?';
+                console.error(err);
+            }
+        }
+
         // QUANTITY
         function changeQty(id, direction) {
             const el = document.getElementById('qty-' + id);
@@ -274,18 +173,26 @@
             el.textContent = val;
         }
 
+        // SEARCH with debounce
+        let searchTimeout;
+        function handleSearch() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                const search = document.getElementById('search-input').value;
+                loadProducts(search);
+            }, 400);
+        }
+
         // FILTER
         function filterProducts(category, btn) {
             document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            document.querySelectorAll('.product-listing-card').forEach(card => {
-                if (category === 'all' || card.dataset.category === category) {
-                    card.style.display = 'flex';
-                } else {
-                    card.style.display = 'none';
-                }
-            });
+            currentCategory = category;
+            const search = document.getElementById('search-input').value;
+            loadProducts(search);
         }
+
+        document.addEventListener('DOMContentLoaded', () => loadProducts());
     </script>
 
 </body>

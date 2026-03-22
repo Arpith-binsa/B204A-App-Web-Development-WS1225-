@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Product – Arpith Binsa</title>
+    <link rel="stylesheet" href="../style.css">
+    <script src="../cart.js"></script>
+    <script
+        src="https://www.paypal.com/sdk/js?client-id=ATLGa7p3a7o8yrpzlIlDmOSI8cPnZT_QyID5ajjYTfxYumjay_QUZwrlmmWBUJ6XWutoZUwi2VUcJswe&currency=EUR"></script>
+</head>
+
+<body>
+    <div id="cart-feedback">Added to cart!</div>
+
+    <div class="navbar">
+        <div class="container nav-container">
+            <div class="logo">
+                <img src="../images/favicon (1) (1).png" alt="Logo" width="50px">
+                <span>Arpith Binsa</span>
+            </div>
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="../index.html">Home</a></li>
+                    <li><a href="services.html">Services</a></li>
+                    <li><a href="products.html" class="active">Products</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                    <li><a href="account.html" class="btn-nav">Account</a></li>
+                    <li><a href="cart.html" class="cart-icon-wrap">
+                            <span class="cart-icon">🛒</span>
+                            <span class="cart-count">0</span>
+                        </a></li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+
+    <div class="product-detail-page" id="product-detail-page">
+        <div class="container">
+            <a href="products.html" class="back-link">← Back to Products</a>
+            <div id="product-loading" class="loading-state">Loading...</div>
+            <div id="product-content" style="display:none">
+                <div class="product-detail-grid">
+
+                    <div class="product-detail-left">
+                        <div class="slider-main">
+                            <button class="slider-btn" onclick="changeSlide(-1)">&#8592;</button>
+                            <div class="slider-img-wrap">
+                                <img id="slider-img" src="" alt="">
+                            </div>
+                            <button class="slider-btn" onclick="changeSlide(1)">&#8594;</button>
+                        </div>
+                        <div class="slider-counter">
+                            <span id="slider-current">1</span> / <span id="slider-total">1</span>
+                        </div>
+                        <div class="slider-thumbs" id="slider-thumbs"></div>
+                    </div>
+
+                    <div class="product-detail-right">
+                        <span class="product-tag" id="detail-category"></span>
+                        <h1 class="product-detail-title" id="detail-name"></h1>
+                        <p class="product-detail-sub" id="detail-desc"></p>
+                        <div class="product-detail-price" id="detail-price"></div>
+
+                        <div class="product-specs" id="detail-specs"></div>
+
+                        <div class="product-actions">
+                            <div class="quantity-wrap">
+                                <label>Quantity</label>
+                                <div class="quantity-control">
+                                    <button onclick="changeQty(-1)">−</button>
+                                    <span id="qty">1</span>
+                                    <button onclick="changeQty(1)">+</button>
+                                </div>
+                            </div>
+                            <button class="btn-add-cart" id="add-cart-btn">Add to Cart</button>
+                            <div id="paypal-button-container"></div>
+                            <div id="order-success" class="booking-success" style="display:none">
+                                Order confirmed! You will receive an email shortly.
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <div class="container">
+            <p>© 2026 Arpith Binsa. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script>
+        const API = 'http://localhost:3000/api';
+        let product = null;
+        let localQty = 1;
+        let currentSlide = 0;
+        let productImages = [];
+
+        async function loadProduct() {
+            const id = localStorage.getItem('currentProduct');
+            if (!id) {
+                window.location.href = 'products.html';
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API}/products/${id}`);
+                product = await res.json();
+
+                document.title = `${product.name} – Arpith Binsa`;
+                document.getElementById('detail-category').textContent = product.category;
+                document.getElementById('detail-name').textContent = product.name;
+                document.getElementById('detail-desc').textContent = product.description;
+                document.getElementById('detail-price').textContent = '€' + product.price.toLocaleString();
+
+                // images — use single image for now
+                productImages = [product.image];
+                document.getElementById('slider-img').src = '../' + product.image;
+                document.getElementById('slider-img').alt = product.name;
+                document.getElementById('slider-total').textContent = productImages.length;
+
+                // thumbs
+                const thumbsContainer = document.getElementById('slider-thumbs');
+                thumbsContainer.innerHTML = productImages.map((img, i) => `
+                    <div class="thumb ${i === 0 ? 'active' : ''}" onclick="goToSlide(${i})">
+                        <img src="../${img}" alt="">
+                    </div>
+                `).join('');
+
+                // specs
+                if (product.specs && Object.keys(product.specs).length > 0) {
+                    document.getElementById('detail-specs').innerHTML = `
+                        <h3>Technical Details</h3>
+                        <table class="specs-table">
+                            ${Object.entries(product.specs).map(([key, val]) => `
+                                <tr>
+                                    <td>${key}</td>
+                                    <td>${val}</td>
+                                </tr>
+                            `).join('')}
+                        </table>
+                    `;
+                }
+
+                // add to cart button
+                document.getElementById('add-cart-btn').onclick = () => {
+                    addToCart(product._id, product.name, product.price, product.image, localQty);
+                };
+
+                document.getElementById('product-loading').style.display = 'none';
+                document.getElementById('product-content').style.display = 'block';
+
+                renderPayPal();
+
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        // SLIDER
+        function changeSlide(direction) {
+            currentSlide = (currentSlide + direction + productImages.length) % productImages.length;
+            updateSlider();
+        }
+
+        function goToSlide(index) {
+            currentSlide = index;
+            updateSlider();
+        }
+
+        function updateSlider() {
+            document.getElementById('slider-img').src = '../' + productImages[currentSlide];
+            document.getElementById('slider-current').textContent = currentSlide + 1;
+            document.querySelectorAll('.thumb').forEach((t, i) => {
+                t.classList.toggle('active', i === currentSlide);
+            });
+        }
+
+        // QUANTITY
+        function changeQty(direction) {
+            localQty = Math.max(1, localQty + direction);
+            document.getElementById('qty').textContent = localQty;
+        }
+
+        // PAYPAL
+        function renderPayPal() {
+            paypal.Buttons({
+                createOrder: function (data, actions) {
+                    return actions.order.create({
+                        purchase_units: [{
+                            amount: {
+                                value: (product.price * localQty).toString(),
+                                currency_code: 'EUR'
+                            },
+                            description: `${product.name} x${localQty} – Arpith Binsa`
+                        }]
+                    });
+                },
+                onApprove: function (data, actions) {
+                    return actions.order.capture().then(function (details) {
+                        const token = localStorage.getItem('token');
+                        if (token) {
+                            fetch(`${API}/orders`, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Authorization': `Bearer ${token}`
+                                },
+                                body: JSON.stringify({
+                                    items: [{ name: product.name, price: product.price, qty: localQty, image: product.image }],
+                                    total: product.price * localQty,
+                                    paypalOrderId: details.id
+                                })
+                            });
+                        }
+                        document.getElementById('paypal-button-container').style.display = 'none';
+                        document.getElementById('order-success').style.display = 'block';
+                    });
+                },
+                onError: function (err) {
+                    alert('Payment failed. Please try again.');
+                },
+                style: { color: 'gold', shape: 'pill', label: 'buynow', height: 50 }
+            }).render('#paypal-button-container');
+        }
+
+        document.addEventListener('DOMContentLoaded', loadProduct);
+    </script>
+
+</body>
+
+</html>
