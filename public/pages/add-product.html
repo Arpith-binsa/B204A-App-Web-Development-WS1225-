@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Add Product – Arpith Binsa</title>
+    <link rel="stylesheet" href="../style.css">
+    <script src="../cart.js"></script>
+</head>
+
+<body>
+
+    <div id="cart-feedback">Added to cart!</div>
+
+    <div class="navbar">
+        <div class="container nav-container">
+            <div class="logo">
+                <img src="../images/favicon (1) (1).png" alt="Logo" width="50px">
+                <span>Arpith Binsa</span>
+            </div>
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="../index.html">Home</a></li>
+                    <li><a href="services.html">Services</a></li>
+                    <li><a href="products.html">Products</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                    <li><a href="account.html" class="btn-nav">Account</a></li>
+                    <li><a href="cart.html" class="cart-icon-wrap">
+                            <span class="cart-icon">🛒</span>
+                            <span class="cart-count">0</span>
+                        </a></li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+
+    <div class="page-hero">
+        <div class="container">
+            <p class="section-label">Manage Products</p>
+            <h1>Add Product</h1>
+        </div>
+    </div>
+
+    <div class="add-product-page">
+        <div class="container">
+
+            <!-- NOT LOGGED IN WARNING -->
+            <div id="auth-warning" class="auth-warning" style="display:none">
+                You need to be logged in to add products.
+                <a href="account.html">Login here</a>
+            </div>
+
+            <div id="product-form-wrap">
+                <div class="add-product-grid">
+
+                    <!-- FORM -->
+                    <div class="add-product-form">
+                        <h2>Product Details</h2>
+
+                        <div class="form-group">
+                            <label>Product Name</label>
+                            <input type="text" id="prod-name" class="text-input" placeholder="eg: Sony A7 III">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Description</label>
+                            <textarea id="prod-desc" class="text-input textarea-input"
+                                placeholder="Describe the product..." rows="4"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Price (€)</label>
+                            <input type="number" id="prod-price" class="text-input" placeholder="eg: 1299">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Category</label>
+                            <select id="prod-category" class="select-input">
+                                <option value="">Select category</option>
+                                <option value="camera">Camera</option>
+                                <option value="lens">Lens</option>
+                                <option value="stabiliser">Stabiliser</option>
+                                <option value="bag">Bag</option>
+                                <option value="accessory">Accessory</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Image Path</label>
+                            <input type="text" id="prod-image" class="text-input"
+                                placeholder="eg: images/products/a7m3_1.jpg">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Technical Specs (optional)</label>
+                            <div id="specs-list">
+                                <div class="spec-row">
+                                    <input type="text" class="text-input spec-key" placeholder="eg: Brand">
+                                    <input type="text" class="text-input spec-value" placeholder="eg: Sony">
+                                    <button class="remove-spec" onclick="removeSpec(this)">×</button>
+                                </div>
+                            </div>
+                            <button class="add-spec-btn" onclick="addSpec()">+ Add Spec</button>
+                        </div>
+
+                        <div id="form-error" class="auth-error" style="display:none"></div>
+                        <div id="form-success" class="booking-success" style="display:none">
+                            Product added successfully!
+                        </div>
+
+                        <button class="auth-submit-btn" onclick="submitProduct()">
+                            Add Product
+                        </button>
+                    </div>
+
+                    <!-- PREVIEW -->
+                    <div class="add-product-preview">
+                        <h2>Preview</h2>
+                        <div class="product-listing-card" style="flex-direction: column">
+                            <div class="product-listing-img-wrap" style="width:100%; height:240px">
+                                <img id="preview-img" src="../images/favicon (1) (1).png" alt="Preview">
+                            </div>
+                            <div class="product-listing-info" style="padding: 20px">
+                                <span class="product-tag" id="preview-category">Category</span>
+                                <h3 id="preview-name">Product Name</h3>
+                                <p id="preview-desc">Product description will appear here.</p>
+                                <div class="product-listing-bottom">
+                                    <span class="product-listing-price" id="preview-price">€0</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <div class="container">
+            <p>© 2026 Arpith Binsa. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script>
+        const API = 'http://localhost:3000/api';
+
+        // CHECK LOGIN
+        document.addEventListener('DOMContentLoaded', () => {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                document.getElementById('auth-warning').style.display = 'block';
+                document.getElementById('product-form-wrap').style.display = 'none';
+            }
+        });
+
+        // LIVE PREVIEW
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('prod-name').addEventListener('input', e => {
+                document.getElementById('preview-name').textContent = e.target.value || 'Product Name';
+            });
+            document.getElementById('prod-desc').addEventListener('input', e => {
+                document.getElementById('preview-desc').textContent = e.target.value || 'Product description will appear here.';
+            });
+            document.getElementById('prod-price').addEventListener('input', e => {
+                document.getElementById('preview-price').textContent = e.target.value ? '€' + Number(e.target.value).toLocaleString() : '€0';
+            });
+            document.getElementById('prod-category').addEventListener('change', e => {
+                document.getElementById('preview-category').textContent = e.target.value || 'Category';
+            });
+            document.getElementById('prod-image').addEventListener('input', e => {
+                document.getElementById('preview-img').src = '../' + e.target.value;
+            });
+        });
+
+        // ADD SPEC ROW
+        function addSpec() {
+            const row = document.createElement('div');
+            row.className = 'spec-row';
+            row.innerHTML = `
+                <input type="text" class="text-input spec-key" placeholder="eg: Weight">
+                <input type="text" class="text-input spec-value" placeholder="eg: 650g">
+                <button class="remove-spec" onclick="removeSpec(this)">×</button>
+            `;
+            document.getElementById('specs-list').appendChild(row);
+        }
+
+        function removeSpec(btn) {
+            btn.parentElement.remove();
+        }
+
+        // SUBMIT
+        async function submitProduct() {
+            const token = localStorage.getItem('token');
+            const errorEl = document.getElementById('form-error');
+            const successEl = document.getElementById('form-success');
+
+            const name = document.getElementById('prod-name').value.trim();
+            const description = document.getElementById('prod-desc').value.trim();
+            const price = document.getElementById('prod-price').value;
+            const category = document.getElementById('prod-category').value;
+            const image = document.getElementById('prod-image').value.trim();
+
+            // validation
+            if (!name || !description || !price || !category) {
+                errorEl.textContent = 'Please fill in all required fields.';
+                errorEl.style.display = 'block';
+                successEl.style.display = 'none';
+                return;
+            }
+
+            // collect specs
+            const specs = {};
+            document.querySelectorAll('.spec-row').forEach(row => {
+                const key = row.querySelector('.spec-key').value.trim();
+                const value = row.querySelector('.spec-value').value.trim();
+                if (key && value) specs[key] = value;
+            });
+
+            try {
+                const res = await fetch(`${API}/products`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ name, description, price: Number(price), category, image, specs })
+                });
+
+                const data = await res.json();
+
+                if (!res.ok) {
+                    errorEl.textContent = data.message || 'Failed to add product.';
+                    errorEl.style.display = 'block';
+                    successEl.style.display = 'none';
+                    return;
+                }
+
+                // success
+                errorEl.style.display = 'none';
+                successEl.style.display = 'block';
+
+                // reset form
+                document.getElementById('prod-name').value = '';
+                document.getElementById('prod-desc').value = '';
+                document.getElementById('prod-price').value = '';
+                document.getElementById('prod-category').value = '';
+                document.getElementById('prod-image').value = '';
+                document.getElementById('specs-list').innerHTML = `
+                    <div class="spec-row">
+                        <input type="text" class="text-input spec-key" placeholder="eg: Brand">
+                        <input type="text" class="text-input spec-value" placeholder="eg: Sony">
+                        <button class="remove-spec" onclick="removeSpec(this)">×</button>
+                    </div>
+                `;
+
+            } catch (err) {
+                errorEl.textContent = 'Something went wrong. Is the server running?';
+                errorEl.style.display = 'block';
+            }
+        }
+    </script>
+
+</body>
+
+</html>
