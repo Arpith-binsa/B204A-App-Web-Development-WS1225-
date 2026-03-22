@@ -8,16 +8,14 @@ function saveCart(cart) {
     localStorage.setItem('cart', JSON.stringify(cart));
 }
 
-function addToCart(id, name, price, image) {
+function addToCart(id, name, price, image, qty = 1) {
     const cart = getCart();
-    
-    // strip any leading ../ so path is always relative to root
     const cleanImage = image.replace(/^(\.\.\/)+/, '');
     
     if (cart[id]) {
-        cart[id].qty += 1;
+        cart[id].qty += qty;
     } else {
-        cart[id] = { id, name, price, image: cleanImage, qty: 1 };
+        cart[id] = { id, name, price, image: cleanImage, qty: qty };
     }
     saveCart(cart);
     updateCartCount();
