@@ -90,11 +90,19 @@
         };
 
         function goToProduct(id) {
-            const product = allProducts.find(p => p._id === id);
-            if (!product) return;
-            const page = pageMap[product.name];
-            if (page) window.location.href = page;
-        }
+                const product = allProducts.find(p => p._id === id);
+                if (!product) return;
+
+                const page = pageMap[product.name];
+                if (page) {
+                    // existing products with their own HTML page
+                    window.location.href = page;
+                } else {
+                    // new products added via form use dynamic page
+                    localStorage.setItem('currentProduct', id);
+                    window.location.href = 'product-detail.html';
+                }
+            }
 
         // LOAD PRODUCTS FROM API
         async function loadProducts(search = '') {
