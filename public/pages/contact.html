@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Contact – Arpith Binsa</title>
+    <link rel="stylesheet" href="../style.css">
+    <script src="../cart.js"></script>
+</head>
+
+<body>
+
+    <div id="cart-feedback">Added to cart!</div>
+
+    <div class="navbar">
+        <div class="container nav-container">
+            <div class="logo">
+                <img src="../images/favicon (1) (1).png" alt="Logo" width="50px">
+                <span>Arpith Binsa</span>
+            </div>
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="../index.html">Home</a></li>
+                    <li><a href="services.html">Services</a></li>
+                    <li><a href="products.html">Products</a></li>
+                    <li><a href="contact.html" class="active">Contact</a></li>
+                    <li><a href="account.html" class="btn-nav">Account</a></li>
+                    <li><a href="cart.html" class="cart-icon-wrap">
+                            <span class="cart-icon">🛒</span>
+                            <span class="cart-count">0</span>
+                        </a></li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+
+    <div class="page-hero">
+        <div class="container">
+            <p class="section-label">Get In Touch</p>
+            <h1>Contact</h1>
+        </div>
+    </div>
+
+    <div class="contact-page">
+        <div class="container">
+            <div class="contact-grid">
+
+                <!-- CONTACT FORM -->
+                <div class="contact-form-wrap">
+                    <h2>Send a Message</h2>
+                    <p>Have a project in mind or want to book a shoot? Fill in the form and I'll get back to you.</p>
+
+                    <div class="form-group">
+                        <label>Your Name</label>
+                        <input type="text" id="contact-name" class="text-input" placeholder="Enter your name">
+                    </div>
+                    <div class="form-group">
+                        <label>Your Email</label>
+                        <input type="email" id="contact-email" class="text-input" placeholder="Enter your email">
+                    </div>
+                    <div class="form-group">
+                        <label>Subject</label>
+                        <select id="contact-subject" class="select-input">
+                            <option value="">Select a subject</option>
+                            <option value="booking">Photography Booking</option>
+                            <option value="product">Product Enquiry</option>
+                            <option value="collaboration">Collaboration</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Message</label>
+                        <textarea id="contact-message" class="text-input textarea-input"
+                            placeholder="Tell me about your project..." rows="5"></textarea>
+                    </div>
+
+                    <div id="contact-error" class="auth-error" style="display:none"></div>
+                    <div id="contact-success" class="booking-success" style="display:none">
+                        Message sent! I'll get back to you soon.
+                    </div>
+
+                    <button class="auth-submit-btn" onclick="sendMessage()">Send Message</button>
+                </div>
+
+                <!-- CONTACT INFO -->
+                <div class="contact-info">
+                    <h2>Contact Info</h2>
+                    <p>Based in Berlin, available worldwide for shoots and collaborations.</p>
+
+                    <div class="contact-info-list">
+                        <div class="contact-info-item">
+                            <span class="contact-info-icon">📍</span>
+                            <div>
+                                <p class="contact-info-label">Location</p>
+                                <p class="contact-info-value">Berlin, Germany</p>
+                            </div>
+                        </div>
+                        <div class="contact-info-item">
+                            <span class="contact-info-icon">📧</span>
+                            <div>
+                                <p class="contact-info-label">Email</p>
+                                <p class="contact-info-value">admin@arpithbinsa.com</p>
+                            </div>
+                        </div>
+                        <div class="contact-info-item">
+                            <span class="contact-info-icon">📷</span>
+                            <div>
+                                <p class="contact-info-label">Instagram</p>
+                                <p class="contact-info-value">@arpith_knipst</p>
+                            </div>
+                        </div>
+                        <div class="contact-info-item">
+                            <span class="contact-info-icon">🌐</span>
+                            <div>
+                                <p class="contact-info-label">Website</p>
+                                <p class="contact-info-value">arpithbinsa.com</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <div class="container">
+            <p>© 2026 Arpith Binsa. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script>
+        function sendMessage() {
+            const name = document.getElementById('contact-name').value.trim();
+            const email = document.getElementById('contact-email').value.trim();
+            const subject = document.getElementById('contact-subject').value;
+            const message = document.getElementById('contact-message').value.trim();
+            const errorEl = document.getElementById('contact-error');
+            const successEl = document.getElementById('contact-success');
+
+            if (!name || !email || !subject || !message) {
+                errorEl.textContent = 'Please fill in all fields.';
+                errorEl.style.display = 'block';
+                successEl.style.display = 'none';
+                return;
+            }
+
+            // hide error show success
+            errorEl.style.display = 'none';
+            successEl.style.display = 'block';
+
+            // reset form
+            document.getElementById('contact-name').value = '';
+            document.getElementById('contact-email').value = '';
+            document.getElementById('contact-subject').value = '';
+            document.getElementById('contact-message').value = '';
+        }
+    </script>
+
+</body>
+
+</html>

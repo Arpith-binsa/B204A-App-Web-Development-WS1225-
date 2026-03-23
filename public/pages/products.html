@@ -80,14 +80,14 @@
 
         // MAP PRODUCT NAME TO SPECIFIC HTML PAGE
         const pageMap = {
-                'Sony A7 III': '/pages/products/a7m3.html',
-                'Sony 200-600mm G': '/pages/products/200600.html',
-                'Sony 50mm f1.8': '/pages/products/50mm.html',
-                'DJI RS3 Mini': '/pages/products/dji.html',
-                'Kentfaith Backpack': '/pages/products/kentfaith.html',
-                'Sony SF-G 128GB SD Card': '/pages/products/sdcard.html',
-                'Sony NP-FZ100 Battery': '/pages/products/battery.html'
-            };
+            'Sony A7 III': 'products/a7m3.html',
+            'Sony 200-600mm G': 'products/200600.html',
+            'Sony 50mm f1.8': 'products/50mm.html',
+            'DJI RS3 Mini': 'products/dji.html',
+            'Kentfaith Backpack': 'products/kentfaith.html',
+            'Sony SF-G 128GB SD Card': 'products/sdcard.html',
+            'Sony NP-FZ100 Battery': 'products/battery.html'
+        };
 
         function goToProduct(id) {
             const product = allProducts.find(p => p._id === id);
