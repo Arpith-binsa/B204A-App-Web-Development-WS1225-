@@ -130,31 +130,49 @@
     </div>
 
     <script>
-        function sendMessage() {
-            const name = document.getElementById('contact-name').value.trim();
-            const email = document.getElementById('contact-email').value.trim();
-            const subject = document.getElementById('contact-subject').value;
-            const message = document.getElementById('contact-message').value.trim();
-            const errorEl = document.getElementById('contact-error');
-            const successEl = document.getElementById('contact-success');
+        async function sendMessage() {
+                const name = document.getElementById('contact-name').value.trim();
+                const email = document.getElementById('contact-email').value.trim();
+                const subject = document.getElementById('contact-subject').value;
+                const message = document.getElementById('contact-message').value.trim();
+                const errorEl = document.getElementById('contact-error');
+                const successEl = document.getElementById('contact-success');
 
-            if (!name || !email || !subject || !message) {
-                errorEl.textContent = 'Please fill in all fields.';
-                errorEl.style.display = 'block';
-                successEl.style.display = 'none';
-                return;
+                if (!name || !email || !subject || !message) {
+                    errorEl.textContent = 'Please fill in all fields.';
+                    errorEl.style.display = 'block';
+                    successEl.style.display = 'none';
+                    return;
+                }
+
+                try {
+                    const res = await fetch('https://your-render-url.onrender.com/api/contact', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ name, email, subject, message })
+                    });
+
+                    const data = await res.json();
+
+                    if (!res.ok) {
+                        errorEl.textContent = data.message || 'Failed to send message.';
+                        errorEl.style.display = 'block';
+                        return;
+                    }
+
+                    errorEl.style.display = 'none';
+                    successEl.style.display = 'block';
+
+                    document.getElementById('contact-name').value = '';
+                    document.getElementById('contact-email').value = '';
+                    document.getElementById('contact-subject').value = '';
+                    document.getElementById('contact-message').value = '';
+
+                } catch (err) {
+                    errorEl.textContent = 'Something went wrong. Is the server running?';
+                    errorEl.style.display = 'block';
+                }
             }
-
-            // hide error show success
-            errorEl.style.display = 'none';
-            successEl.style.display = 'block';
-
-            // reset form
-            document.getElementById('contact-name').value = '';
-            document.getElementById('contact-email').value = '';
-            document.getElementById('contact-subject').value = '';
-            document.getElementById('contact-message').value = '';
-        }
     </script>
 
 </body>
