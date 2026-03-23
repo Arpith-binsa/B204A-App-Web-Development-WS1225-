@@ -34,7 +34,7 @@ https://arpith-binsa.onrender.com
 
 ## Test Admin Account
 Register an account then contact me to upgrade to admin.
-Or Use the Credentaion i Show in the Youtube Video to Login
+Or Use the Credentials i Show in the Youtube Video to Login
 
 ## API Endpoints
 - POST /api/auth/register
