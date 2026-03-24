@@ -48,7 +48,7 @@
 
                 <!-- CART ITEMS -->
                 <div class="cart-items" id="cart-items">
-                    <!-- filled by JS -->
+                    
                 </div>
 
                 <!-- ORDER SUMMARY -->
@@ -193,7 +193,6 @@
                         const items = Object.values(cart);
                         const total = getCartTotal();
 
-                        // save to backend if logged in
                         if (token) {
                             fetch('https://arpith-binsa.onrender.com/api/orders', {
                                 method: 'POST',

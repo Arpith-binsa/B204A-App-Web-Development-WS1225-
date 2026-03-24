@@ -3,7 +3,6 @@ const router = express.Router();
 const Order = require('../models/Order');
 const authMiddleware = require('../middleware/auth');
 
-// SAVE ORDER after PayPal payment
 router.post('/', authMiddleware, async (req, res) => {
     try {
         const { items, total, paypalOrderId } = req.body;
@@ -23,7 +22,6 @@ router.post('/', authMiddleware, async (req, res) => {
     }
 });
 
-// GET USER'S ORDERS
 router.get('/my-orders', authMiddleware, async (req, res) => {
     try {
         const orders = await Order.find({ user: req.user.id })

@@ -111,7 +111,6 @@
                         </table>
                     </div>
 
-                    <!-- QUANTITY + BUTTONS -->
                     <div class="product-actions">
 
                         <div class="quantity-wrap">
@@ -184,7 +183,7 @@
             document.getElementById('qty').textContent = localQty;
         }
 
-        // PAYPAL — Buy Now
+        // PAYPAL 
         paypal.Buttons({
             createOrder: function (data, actions) {
                 return actions.order.create({

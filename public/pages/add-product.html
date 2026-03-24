@@ -44,7 +44,6 @@
     <div class="add-product-page">
         <div class="container">
 
-            <!-- NOT LOGGED IN WARNING -->
             <div id="auth-warning" class="auth-warning" style="display:none">
                 You need to be logged in to add products.
                 <a href="account.html">Login here</a>
@@ -145,7 +144,6 @@
     <script>
         const API = 'https://arpith-binsa.onrender.com/api';
 
-        // CHECK LOGIN
         document.addEventListener('DOMContentLoaded', () => {
             const token = localStorage.getItem('token');
             if (!token) {
@@ -173,7 +171,6 @@
             });
         });
 
-        // ADD SPEC ROW
         function addSpec() {
             const row = document.createElement('div');
             row.className = 'spec-row';
@@ -209,7 +206,6 @@
                 return;
             }
 
-            // collect specs
             const specs = {};
             document.querySelectorAll('.spec-row').forEach(row => {
                 const key = row.querySelector('.spec-key').value.trim();
@@ -236,7 +232,6 @@
                     return;
                 }
 
-                // success
                 errorEl.style.display = 'none';
                 successEl.style.display = 'block';
 

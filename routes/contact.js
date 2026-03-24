@@ -12,7 +12,6 @@ const MessageSchema = new mongoose.Schema({
 
 const Message = mongoose.model('Message', MessageSchema);
 
-// SAVE MESSAGE
 router.post('/', async (req, res) => {
     try {
         const { name, email, subject, message } = req.body;

@@ -1,12 +1,29 @@
 # Arpith Binsa — Photography & Gear Shop
-# Project for B204A-App-Web-Development-Ws1225
+# Project for B204A App & Web Development (WS1225)
 
 ## Live Demo
 https://arpith-binsa.onrender.com
 
-## Prerequisites
-- Node.js installed
-- MongoDB Atlas account (or use the live demo)
+Note: The live demo is hosted on Render's free tier. If the site takes 
+30-50 seconds to load on first visit, this is normal — the server spins 
+down after inactivity and needs a moment to wake up.
+
+## Tech Stack
+- Frontend: HTML, CSS, JavaScript
+- Backend: Node.js, Express.js
+- Database: MongoDB Atlas
+- Payment: PayPal Sandbox
+- Deployment: Render
+
+## Test Credentials
+Use these to log in and test the site without registering:
+
+Site Login:
+- Email: testuser@test.com
+- Password: Test1234
+
+PayPal Sandbox Buyer credentials are shown in the private YouTube video 
+submitted alongside this report.
 
 ## Run Locally
 
@@ -14,34 +31,67 @@ https://arpith-binsa.onrender.com
 1. Install Docker from docker.com
 2. Clone the repo:
    git clone https://github.com/Arpith-binsa/B204A-App-Web-Development-WS1225-.git
-3. Create a `.env` file in the root:
-   MONGO_URI=(Cant Share Due to Security Reasons)
-   JWT_SECRET=(Cant Share)
+3. Create a `.env` file in the project root:
+   MONGO_URI=your_mongodb_connection_string
+   JWT_SECRET=any_random_string
    PORT=3000
-   Use the Credentials Shown in Private Youtube Video
+   
+   Note: You will need your own free MongoDB Atlas account to get a 
+   connection string. Alternatively just use the live demo above.
 
-4. Build and run:
+4. Build the Docker image:
    docker build -t arpith-binsa .
+
+5. Run the container:
    docker run -p 3000:3000 --env-file .env arpith-binsa
-5. Open http://localhost:3000
+
+6. Open http://localhost:3000
 
 ### Option 2 — Without Docker
-1. Clone the repo
-2. Run: npm install
-3. Create .env file as above
-4. Run: node server.js
-5. Open http://localhost:3000
+1. Clone the repo:
+   git clone https://github.com/Arpith-binsa/B204A-App-Web-Development-WS1225-.git
+2. Install dependencies:
+   npm install
+3. Create a `.env` file as described above
+4. Seed the database with initial products:
+   node seed.js
+5. Start the server:
+   node server.js
+6. Open http://localhost:3000
 
-## Test Admin Account
-Register an account then contact me to upgrade to admin.
-Or Use the Credentials i Show in the Youtube Video to Login
+## Admin Access
+To access the add product page you need an admin account.
+The test account above is a regular user.
+Admin credentials are shown in the private YouTube video.
 
 ## API Endpoints
-- POST /api/auth/register
-- POST /api/auth/login
-- GET /api/products
-- POST /api/products (admin only)
-- DELETE /api/products/:id (admin only)
-- GET /api/orders/my-orders
-- POST /api/orders
-- POST /api/contact
+
+### Authentication
+- POST /api/auth/register — Register a new user
+- POST /api/auth/login — Login and receive JWT token
+- GET /api/auth/me — Get current logged in user
+
+### Products
+- GET /api/products — Get all products (supports ?search= and ?category=)
+- GET /api/products/:id — Get single product
+- POST /api/products — Add new product (admin only)
+- PUT /api/products/:id — Update product (admin only)
+- DELETE /api/products/:id — Delete product (admin only)
+
+### Orders
+- POST /api/orders — Save order after PayPal payment
+- GET /api/orders/my-orders — Get orders for logged in user
+
+### Contact
+- POST /api/contact — Save contact form submission
+- GET /api/contact — Get all messages (admin only)
+
+## Database Collections
+- users — registered user accounts
+- products — gear listings
+- orders — confirmed purchases and bookings
+- messages — contact form submissions
+
+## Seed Database
+To populate the database with initial product data:
+node seed.js

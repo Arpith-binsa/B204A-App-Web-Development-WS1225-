@@ -78,7 +78,7 @@
         let allProducts = [];
         let currentCategory = 'all';
 
-        // MAP PRODUCT NAME TO SPECIFIC HTML PAGE
+        // MAP PRODUCT NAME TO a SPECIFIC HTML PAGE
         const pageMap = {
             'Sony A7 III': 'products/a7m3.html',
             'Sony 200-600mm G': 'products/200600.html',
@@ -181,7 +181,6 @@
             el.textContent = val;
         }
 
-        // SEARCH with debounce
         let searchTimeout;
         function handleSearch() {
             clearTimeout(searchTimeout);
@@ -191,7 +190,6 @@
             }, 400);
         }
 
-        // FILTER
         function filterProducts(category, btn) {
             document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
