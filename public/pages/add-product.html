@@ -145,12 +145,15 @@
         const API = 'https://arpith-binsa.onrender.com/api';
 
         document.addEventListener('DOMContentLoaded', () => {
-            const token = localStorage.getItem('token');
-            if (!token) {
-                document.getElementById('auth-warning').style.display = 'block';
-                document.getElementById('product-form-wrap').style.display = 'none';
-            }
-        });
+                const token = localStorage.getItem('token');
+                const user = JSON.parse(localStorage.getItem('user'));
+
+                // redirect if not logged in or not admin
+                if (!token || !user || user.role !== 'admin') {
+                    window.location.href = 'account.html';
+                    return;
+                }
+            });
 
         // LIVE PREVIEW
         document.addEventListener('DOMContentLoaded', () => {
