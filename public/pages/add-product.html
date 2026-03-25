@@ -149,7 +149,7 @@
                 const user = JSON.parse(localStorage.getItem('user'));
 
                 // redirect if not logged in or not admin
-                if (!token || !user || user.role !== 'admin') {
+                if (!token || !user || user.role == 'user') {
                     window.location.href = 'account.html';
                     return;
                 }
