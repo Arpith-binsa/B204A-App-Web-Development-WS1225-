@@ -44,14 +44,16 @@
     <script>
         const API = '/api';
 
+        // ─── ROUTER ──────────────────────────────────────────────────────────────
+
         const routes = {
             '/': renderHome,
-            '/services': () => `<p style="padding:200px 0;text-align:center">Services — coming soon</p>`,
-            '/products': () => `<p style="padding:200px 0;text-align:center">Products — coming soon</p>`,
-            '/contact': () => `<p style="padding:200px 0;text-align:center">Contact — coming soon</p>`,
-            '/account': () => `<p style="padding:200px 0;text-align:center">Account — coming soon</p>`,
-            '/cart': () => `<p style="padding:200px 0;text-align:center">Cart — coming soon</p>`,
-            '/add-product': () => `<p style="padding:200px 0;text-align:center">Add Product — coming soon</p>`
+            '/services': renderNotFound,
+            '/products': renderProducts,
+            '/contact': renderNotFound,
+            '/account': renderNotFound,
+            '/cart': renderNotFound,
+            '/add-product': renderNotFound
         };
 
         function navigate(path) {
@@ -60,8 +62,8 @@
         }
 
         function renderRoute(path) {
-            const fn = routes[path] || (() => `<p style="padding:200px 0;text-align:center">Page not found.</p>`);
-            document.getElementById('app').innerHTML = fn();
+            const fn = routes[path] || renderNotFound;
+            fn();
             updateActiveNav(path);
             window.scrollTo(0, 0);
         }
@@ -69,13 +71,16 @@
         function updateActiveNav(path) {
             document.querySelectorAll('.nav-links a').forEach(link => {
                 link.classList.remove('active');
-                if (link.getAttribute('href') === path) {
-                    link.classList.add('active');
-                }
+                if (link.getAttribute('href') === path) link.classList.add('active');
             });
         }
 
-        // intercept all internal link clicks
+        function renderNotFound() {
+            document.title = 'Arpith Binsa';
+            document.getElementById('app').innerHTML =
+                '<p style="padding:200px 0;text-align:center">Coming soon.</p>';
+        }
+
         document.addEventListener('click', e => {
             const link = e.target.closest('a[href]');
             if (!link) return;
@@ -94,7 +99,7 @@
 
         function renderHome() {
             document.title = 'Arpith Binsa';
-            return `
+            document.getElementById('app').innerHTML = `
                 <div class="hero">
                     <div class="hero-overlay"></div>
                     <div class="container hero-content">
@@ -233,6 +238,145 @@
                     </div>
                 </div>
             `;
+        }
+
+        // ─── PRODUCTS ────────────────────────────────────────────────────────────
+
+        let allProducts = [];
+        let currentCategory = 'all';
+        let searchTimeout;
+
+        function renderProducts() {
+            document.title = 'Products – Arpith Binsa';
+            document.getElementById('app').innerHTML = `
+                <div class="page-hero">
+                    <div class="container">
+                        <p class="section-label">Gear I Personally Use</p>
+                        <h1>Products</h1>
+                    </div>
+                </div>
+
+                <div class="products-page">
+                    <div class="container">
+
+                        <div class="products-controls">
+                            <div class="search-wrap">
+                                <input type="text" id="search-input" class="text-input search-input"
+                                    placeholder="Search products..." oninput="handleSearch()">
+                            </div>
+                            <div class="filter-tabs">
+                                <button class="filter-btn active" onclick="filterProducts('all', this)">All</button>
+                                <button class="filter-btn" onclick="filterProducts('camera', this)">Cameras</button>
+                                <button class="filter-btn" onclick="filterProducts('lens', this)">Lenses</button>
+                                <button class="filter-btn" onclick="filterProducts('stabiliser', this)">Stabilisers</button>
+                                <button class="filter-btn" onclick="filterProducts('bag', this)">Bags</button>
+                                <button class="filter-btn" onclick="filterProducts('accessory', this)">Accessories</button>
+                            </div>
+                        </div>
+
+                        <div id="loading" class="loading-state">Loading products...</div>
+                        <div class="products-listing" id="products-listing" style="display:none"></div>
+                        <div id="products-empty" class="cart-empty-box" style="display:none">
+                            <p>No products found.</p>
+                        </div>
+
+                    </div>
+                </div>
+            `;
+
+            currentCategory = 'all';
+            loadProducts();
+        }
+
+        async function loadProducts(search = '') {
+            const loading = document.getElementById('loading');
+            const listing = document.getElementById('products-listing');
+            const empty = document.getElementById('products-empty');
+            if (!loading) return;
+
+            loading.style.display = 'block';
+            listing.style.display = 'none';
+            empty.style.display = 'none';
+
+            try {
+                let url = `${API}/products`;
+                const params = [];
+                if (search) params.push(`search=${encodeURIComponent(search)}`);
+                if (currentCategory !== 'all') params.push(`category=${currentCategory}`);
+                if (params.length) url += '?' + params.join('&');
+
+                const res = await fetch(url);
+                const products = await res.json();
+                allProducts = products;
+
+                loading.style.display = 'none';
+
+                if (products.length === 0) {
+                    empty.style.display = 'block';
+                    return;
+                }
+
+                listing.style.display = 'flex';
+                listing.innerHTML = products.map(product => `
+                    <div class="product-listing-card">
+                        <div class="product-listing-img-wrap" onclick="goToProduct('${product._id}')" style="cursor:pointer">
+                            <img src="${product.image}" alt="${product.name}"
+                                onerror="this.src='images/favicon (1) (1).png'">
+                        </div>
+                        <div class="product-listing-info">
+                            <span class="product-tag">${product.category}</span>
+                            <h3 onclick="goToProduct('${product._id}')" style="cursor:pointer">${product.name}</h3>
+                            <p>${product.description}</p>
+                            <div class="product-listing-bottom">
+                                <span class="product-listing-price">€${product.price.toLocaleString()}</span>
+                                <div class="qty-add">
+                                    <div class="quantity-control">
+                                        <button onclick="changeQty('${product._id}', -1)">−</button>
+                                        <span id="qty-${product._id}">1</span>
+                                        <button onclick="changeQty('${product._id}', 1)">+</button>
+                                    </div>
+                                    <button class="btn-add-cart"
+                                        onclick="addToCart('${product._id}', '${product.name}', ${product.price}, '${product.image}', parseInt(document.getElementById('qty-${product._id}').textContent))">
+                                        Add to Cart
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+
+            } catch (err) {
+                loading.style.display = 'none';
+                empty.style.display = 'block';
+                document.querySelector('#products-empty p').textContent =
+                    'Failed to load products. Is the server running?';
+            }
+        }
+
+        function changeQty(id, direction) {
+            const el = document.getElementById('qty-' + id);
+            let val = parseInt(el.textContent);
+            el.textContent = Math.max(1, val + direction);
+        }
+
+        function handleSearch() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                const search = document.getElementById('search-input').value;
+                loadProducts(search);
+            }, 400);
+        }
+
+        function filterProducts(category, btn) {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentCategory = category;
+            const search = document.getElementById('search-input').value;
+            loadProducts(search);
+        }
+
+        function goToProduct(id) {
+            navigate('/products/' + id);
         }
     </script>
 
