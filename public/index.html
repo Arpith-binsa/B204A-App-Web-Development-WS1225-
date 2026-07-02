@@ -48,7 +48,7 @@
 
         const routes = {
             '/': renderHome,
-            '/services': renderNotFound,
+            '/services': renderServices,
             '/products': renderProducts,
             '/contact': renderContact,
             '/account': renderAccount,
@@ -377,6 +377,83 @@
 
         function goToProduct(id) {
             navigate('/products/' + id);
+        }
+
+        // ─── SERVICES ────────────────────────────────────────────────────────────
+
+        function renderServices() {
+            document.title = 'Services – Arpith Binsa';
+            document.getElementById('app').innerHTML = `
+                <div class="page-hero">
+                    <div class="container">
+                        <p class="section-label">What I Offer</p>
+                        <h1>Services</h1>
+                    </div>
+                </div>
+
+                <div class="services-list">
+                    <div class="container">
+                        <div class="services-grid">
+
+                            <a href="/services/football" class="service-card">
+                                <div class="service-img-wrap">
+                                    <img src="images/services/football1.jpg" alt="Sports Photography">
+                                </div>
+                                <div class="service-info">
+                                    <h3>Sports Photography</h3>
+                                    <p>Football, athletics and action shots that capture the energy of the moment.</p>
+                                    <span class="price">€200 – €500</span>
+                                </div>
+                            </a>
+
+                            <a href="/services/wedding" class="service-card">
+                                <div class="service-img-wrap">
+                                    <img src="images/wedding.jpg" alt="Wedding Photography">
+                                </div>
+                                <div class="service-info">
+                                    <h3>Wedding Photography</h3>
+                                    <p>Timeless wedding coverage from ceremony to reception.</p>
+                                    <span class="price">€1000 – €2000</span>
+                                </div>
+                            </a>
+
+                            <a href="/services/automotive" class="service-card">
+                                <div class="service-img-wrap">
+                                    <img src="images/automotive.jpg" alt="Automotive Photography">
+                                </div>
+                                <div class="service-info">
+                                    <h3>Automotive Photography</h3>
+                                    <p>Stunning car shots for dealerships, marketing, and editorial use.</p>
+                                    <span class="price">€800 – €1500</span>
+                                </div>
+                            </a>
+
+                            <a href="/services/portrait" class="service-card">
+                                <div class="service-img-wrap">
+                                    <img src="images/portrait.jpg" alt="Portrait Sessions">
+                                </div>
+                                <div class="service-info">
+                                    <h3>Portrait Sessions</h3>
+                                    <p>Professional headshots and personal portraits in studio or on location.</p>
+                                    <span class="price">€150 – €300</span>
+                                </div>
+                            </a>
+
+                            <a href="/services/fashion" class="service-card">
+                                <div class="service-img-wrap">
+                                    <img src="images/fashion.jpg" alt="Fashion Shoots">
+                                </div>
+                                <div class="service-info">
+                                    <h3>Fashion Shoots</h3>
+                                    <p>Creative fashion photography for lookbooks, editorials and portfolios.</p>
+                                    <span class="price">€500 – €1200</span>
+                                </div>
+                            </a>
+
+                        </div>
+                    </div>
+                </div>
+            `;
         }
 
         // ─── ADD PRODUCT ─────────────────────────────────────────────────────────
