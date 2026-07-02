@@ -53,7 +53,7 @@
             '/contact': renderContact,
             '/account': renderAccount,
             '/cart': renderCart,
-            '/add-product': renderNotFound
+            '/add-product': renderAddProduct
         };
 
         function navigate(path) {
@@ -377,6 +377,189 @@
 
         function goToProduct(id) {
             navigate('/products/' + id);
+        }
+
+        // ─── ADD PRODUCT ─────────────────────────────────────────────────────────
+
+        function renderAddProduct() {
+            document.title = 'Add Product – Arpith Binsa';
+
+            const token = localStorage.getItem('token');
+            const user = JSON.parse(localStorage.getItem('user'));
+
+            if (!token || !user || user.role === 'user') {
+                navigate('/account');
+                return;
+            }
+
+            document.getElementById('app').innerHTML = `
+                <div class="page-hero">
+                    <div class="container">
+                        <p class="section-label">Manage Products</p>
+                        <h1>Add Product</h1>
+                    </div>
+                </div>
+
+                <div class="add-product-page">
+                    <div class="container">
+                        <div class="add-product-grid">
+
+                            <div class="add-product-form">
+                                <h2>Product Details</h2>
+
+                                <div class="form-group">
+                                    <label>Product Name</label>
+                                    <input type="text" id="prod-name" class="text-input" placeholder="eg: Sony A7 III"
+                                        oninput="document.getElementById('preview-name').textContent = this.value || 'Product Name'">
+                                </div>
+                                <div class="form-group">
+                                    <label>Description</label>
+                                    <textarea id="prod-desc" class="text-input textarea-input"
+                                        placeholder="Describe the product..." rows="4"
+                                        oninput="document.getElementById('preview-desc').textContent = this.value || 'Product description will appear here.'"></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label>Price (€)</label>
+                                    <input type="number" id="prod-price" class="text-input" placeholder="eg: 1299"
+                                        oninput="document.getElementById('preview-price').textContent = this.value ? '€' + Number(this.value).toLocaleString() : '€0'">
+                                </div>
+                                <div class="form-group">
+                                    <label>Category</label>
+                                    <select id="prod-category" class="select-input"
+                                        onchange="document.getElementById('preview-category').textContent = this.value || 'Category'">
+                                        <option value="">Select category</option>
+                                        <option value="camera">Camera</option>
+                                        <option value="lens">Lens</option>
+                                        <option value="stabiliser">Stabiliser</option>
+                                        <option value="bag">Bag</option>
+                                        <option value="accessory">Accessory</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Image Path</label>
+                                    <input type="text" id="prod-image" class="text-input"
+                                        placeholder="eg: images/products/a7m3_1.jpg"
+                                        oninput="document.getElementById('preview-img').src = this.value">
+                                </div>
+                                <div class="form-group">
+                                    <label>Technical Specs (optional)</label>
+                                    <div id="specs-list">
+                                        <div class="spec-row">
+                                            <input type="text" class="text-input spec-key" placeholder="eg: Brand">
+                                            <input type="text" class="text-input spec-value" placeholder="eg: Sony">
+                                            <button class="remove-spec" onclick="removeSpec(this)">×</button>
+                                        </div>
+                                    </div>
+                                    <button class="add-spec-btn" onclick="addSpec()">+ Add Spec</button>
+                                </div>
+
+                                <div id="form-error" class="auth-error" style="display:none"></div>
+                                <div id="form-success" class="booking-success" style="display:none">
+                                    Product added successfully!
+                                </div>
+
+                                <button class="auth-submit-btn" onclick="submitProduct()">Add Product</button>
+                            </div>
+
+                            <div class="add-product-preview">
+                                <h2>Preview</h2>
+                                <div class="product-listing-card" style="flex-direction:column">
+                                    <div class="product-listing-img-wrap" style="width:100%;height:240px">
+                                        <img id="preview-img" src="images/favicon (1) (1).png" alt="Preview">
+                                    </div>
+                                    <div class="product-listing-info" style="padding:20px">
+                                        <span class="product-tag" id="preview-category">Category</span>
+                                        <h3 id="preview-name">Product Name</h3>
+                                        <p id="preview-desc">Product description will appear here.</p>
+                                        <div class="product-listing-bottom">
+                                            <span class="product-listing-price" id="preview-price">€0</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function addSpec() {
+            const row = document.createElement('div');
+            row.className = 'spec-row';
+            row.innerHTML = `
+                <input type="text" class="text-input spec-key" placeholder="eg: Weight">
+                <input type="text" class="text-input spec-value" placeholder="eg: 650g">
+                <button class="remove-spec" onclick="removeSpec(this)">×</button>
+            `;
+            document.getElementById('specs-list').appendChild(row);
+        }
+
+        function removeSpec(btn) {
+            btn.parentElement.remove();
+        }
+
+        async function submitProduct() {
+            const token = localStorage.getItem('token');
+            const errorEl = document.getElementById('form-error');
+            const successEl = document.getElementById('form-success');
+
+            const name = document.getElementById('prod-name').value.trim();
+            const description = document.getElementById('prod-desc').value.trim();
+            const price = document.getElementById('prod-price').value;
+            const category = document.getElementById('prod-category').value;
+            const image = document.getElementById('prod-image').value.trim();
+
+            if (!name || !description || !price || !category) {
+                errorEl.textContent = 'Please fill in all required fields.';
+                errorEl.style.display = 'block';
+                successEl.style.display = 'none';
+                return;
+            }
+
+            const specs = {};
+            document.querySelectorAll('.spec-row').forEach(row => {
+                const key = row.querySelector('.spec-key').value.trim();
+                const value = row.querySelector('.spec-value').value.trim();
+                if (key && value) specs[key] = value;
+            });
+
+            try {
+                const res = await fetch(`${API}/products`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ name, description, price: Number(price), category, image, specs })
+                });
+
+                const data = await res.json();
+
+                if (!res.ok) {
+                    errorEl.textContent = data.message || 'Failed to add product.';
+                    errorEl.style.display = 'block';
+                    successEl.style.display = 'none';
+                    return;
+                }
+
+                errorEl.style.display = 'none';
+                successEl.style.display = 'block';
+
+                document.getElementById('prod-name').value = '';
+                document.getElementById('prod-desc').value = '';
+                document.getElementById('prod-price').value = '';
+                document.getElementById('prod-category').value = '';
+                document.getElementById('prod-image').value = '';
+                document.getElementById('specs-list').innerHTML = `
+                    <div class="spec-row">
+                        <input type="text" class="text-input spec-key" placeholder="eg: Brand">
+                        <input type="text" class="text-input spec-value" placeholder="eg: Sony">
+                        <button class="remove-spec" onclick="removeSpec(this)">×</button>
+                    </div>
+                `;
+
+            } catch (err) {
+                errorEl.textContent = 'Something went wrong. Is the server running?';
+                errorEl.style.display = 'block';
+            }
         }
 
         // ─── CART ────────────────────────────────────────────────────────────────
