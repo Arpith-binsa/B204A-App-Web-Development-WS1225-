@@ -1,0 +1,7 @@
+# Keep secrets and local cruft out of the Docker build context / image.
+.env
+node_modules
+npm-debug.log
+.git
+.gitignore
+.DS_Store

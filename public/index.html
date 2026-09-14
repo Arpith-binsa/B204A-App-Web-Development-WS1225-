@@ -1,0 +1,1674 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Arpith Binsa</title>
+    <!-- Because this SPA renders nested routes like /services/football, all
+         relative asset paths (style.css, cart.js, images/...) must resolve from
+         the site root, not from the current route. <base> guarantees that. -->
+    <base href="/">
+    <link rel="stylesheet" href="style.css">
+    <script src="cart.js"></script>
+</head>
+
+<body>
+    <div id="cart-feedback">Added to cart!</div>
+
+    <div class="navbar">
+        <div class="container nav-container">
+            <div class="logo">
+                <img src="images/favicon (1) (1).png" alt="Logo" width="50px">
+                <span>Arpith Binsa</span>
+            </div>
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/services">Services</a></li>
+                    <li><a href="/products">Products</a></li>
+                    <li><a href="/contact">Contact</a></li>
+                    <li><a href="/account" class="btn-nav">Account</a></li>
+                    <li><a href="/cart" class="cart-icon-wrap">
+                            <span class="cart-icon">🛒</span>
+                            <span class="cart-count">0</span>
+                        </a></li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+
+    <div id="app"></div>
+
+    <div class="footer">
+        <div class="container">
+            <p>© 2026 Arpith Binsa. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script>
+        const API = '/api';
+
+        // ─── SERVICE DATA ────────────────────────────────────────────────────────
+        // Data for each bookable service, keyed by its URL slug. This replaces
+        // the old separate HTML pages (one per service) so every service detail
+        // view is rendered by this single-page app via client-side routing.
+        const SERVICES = {
+            football: {
+                label: 'Sports Photography',
+                title: 'Football & Action',
+                desc: 'Raw intensity and passion captured at the perfect moment. Available for matches, training sessions and sporting events across Berlin and beyond.',
+                priceRange: '€200 – €500',
+                bookingTitle: 'Book Sports Photography',
+                orderLabel: 'Sports Photography Booking',
+                imagePrefix: 'images/services/football',
+                imageCount: 6,
+                packages: [
+                    { value: 200, label: 'Basic – 2 hours (€200)' },
+                    { value: 350, label: 'Standard – 4 hours (€350)' },
+                    { value: 500, label: 'Full Day – 8 hours (€500)' }
+                ]
+            },
+            wedding: {
+                label: 'Wedding Photography',
+                title: 'Preserving Your Special Day',
+                desc: 'From the ceremony to the reception, I capture every emotion and detail of your wedding day.',
+                priceRange: '€1,000 – €2,000',
+                bookingTitle: 'Book Wedding Photography',
+                orderLabel: 'Wedding Photography Booking',
+                imagePrefix: 'images/services/wedding',
+                imageCount: 6,
+                packages: [
+                    { value: 1000, label: 'Basic – 1 day (€1,000)' },
+                    { value: 1500, label: 'Standard – 2 days (€1,500)' },
+                    { value: 2000, label: 'Full Coverage – 3 days (€2,000)' }
+                ]
+            },
+            automotive: {
+                label: 'Automotive Photography',
+                title: 'Stunning Car Shots',
+                desc: 'Professional automotive photography for dealerships, marketing, and editorial use.',
+                priceRange: '€800 – €1,500',
+                bookingTitle: 'Book Automotive Photography',
+                orderLabel: 'Automotive Photography Booking',
+                imagePrefix: 'images/services/automotive',
+                imageCount: 6,
+                packages: [
+                    { value: 800, label: 'Basic – 2 hours (€800)' },
+                    { value: 1000, label: 'Standard – 4 hours (€1,000)' },
+                    { value: 1500, label: 'Full Coverage – 8 hours (€1,500)' }
+                ]
+            },
+            portrait: {
+                label: 'Portrait Photography',
+                title: 'Stunning Portrait Shots',
+                desc: 'Professional portrait photography for individuals, families, and corporate clients.',
+                priceRange: '€150 – €300',
+                bookingTitle: 'Book Portrait Photography',
+                orderLabel: 'Portrait Photography Booking',
+                imagePrefix: 'images/services/portrait',
+                imageCount: 6,
+                packages: [
+                    { value: 150, label: 'Basic – 4 Shots (€150)' },
+                    { value: 200, label: 'Standard – 10 Shots (€200)' },
+                    { value: 300, label: 'Studio – 20 Shots (€300)' }
+                ]
+            },
+            fashion: {
+                label: 'Fashion Photography',
+                title: 'Stunning Fashion Shots',
+                desc: 'Professional fashion photography for magazines, brands, and editorial shoots.',
+                priceRange: '€500 – €1,200',
+                bookingTitle: 'Book Fashion Photography',
+                orderLabel: 'Fashion Photography Booking',
+                imagePrefix: 'images/services/fashion',
+                imageCount: 6,
+                packages: [
+                    { value: 500, label: 'Basic – 2 hours (€500)' },
+                    { value: 1000, label: 'Standard – 4 hours (€1,000)' },
+                    { value: 1200, label: 'Full Coverage – 8 hours (€1,200)' }
+                ]
+            }
+        };
+
+        // ─── ROUTER ──────────────────────────────────────────────────────────────
+
+        const routes = {
+            '/': renderHome,
+            '/services': renderServices,
+            '/products': renderProducts,
+            '/contact': renderContact,
+            '/account': renderAccount,
+            '/cart': renderCart,
+            '/add-product': renderAddProduct
+        };
+
+        function navigate(path) {
+            window.history.pushState({}, '', path);
+            renderRoute(path);
+        }
+
+        function renderRoute(path) {
+            const productMatch = path.match(/^\/products\/(.+)$/);
+            if (productMatch) {
+                renderProductDetail(productMatch[1]);
+                updateActiveNav('/products');
+                window.scrollTo(0, 0);
+                return;
+            }
+            // Service-detail routes (e.g. /services/football) are rendered by
+            // the same single-page app instead of separate HTML files, so the
+            // frontend stays a true SPA with client-side routing.
+            const serviceMatch = path.match(/^\/services\/(.+)$/);
+            if (serviceMatch && SERVICES[serviceMatch[1]]) {
+                renderServiceDetail(serviceMatch[1]);
+                updateActiveNav('/services');
+                window.scrollTo(0, 0);
+                return;
+            }
+            const fn = routes[path] || renderNotFound;
+            fn();
+            updateActiveNav(path);
+            window.scrollTo(0, 0);
+        }
+
+        function updateActiveNav(path) {
+            document.querySelectorAll('.nav-links a').forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === path) link.classList.add('active');
+            });
+        }
+
+        function renderNotFound() {
+            document.title = 'Arpith Binsa';
+            document.getElementById('app').innerHTML =
+                '<p style="padding:200px 0;text-align:center">Coming soon.</p>';
+        }
+
+        document.addEventListener('click', e => {
+            const link = e.target.closest('a[href]');
+            if (!link) return;
+            const href = link.getAttribute('href');
+            if (href && href.startsWith('/') && !href.startsWith('//')) {
+                e.preventDefault();
+                navigate(href);
+            }
+        });
+
+        window.addEventListener('popstate', () => renderRoute(window.location.pathname));
+
+        document.addEventListener('DOMContentLoaded', () => renderRoute(window.location.pathname));
+
+        // ─── HOME ────────────────────────────────────────────────────────────────
+
+        function renderHome() {
+            document.title = 'Arpith Binsa';
+            document.getElementById('app').innerHTML = `
+                <div class="hero">
+                    <div class="hero-overlay"></div>
+                    <div class="container hero-content">
+                        <p class="hero-sub">Photography &amp; Videography</p>
+                        <h1>Turn Moments into<br>Masterpieces</h1>
+                        <p class="hero-desc">Based in Berlin. Available worldwide.</p>
+                        <a href="/services" class="btn-primary">View Services</a>
+                    </div>
+                </div>
+
+                <div class="services" id="services">
+                    <div class="container">
+                        <p class="section-label">What I Offer</p>
+                        <h2>Services</h2>
+                        <div class="services-grid">
+
+                            <a href="/services/football" class="service-card">
+                                <div class="service-img-wrap">
+                                    <img src="images/services/football1.jpg" alt="Sports Photography">
+                                </div>
+                                <div class="service-info">
+                                    <h3>Sports Photography</h3>
+                                    <p>Football, athletics and action shots that capture the energy of the moment.</p>
+                                    <span class="price">€200 – €500</span>
+                                </div>
+                            </a>
+
+                            <a href="/services/wedding" class="service-card">
+                                <div class="service-img-wrap">
+                                    <img src="images/wedding.jpg" alt="Wedding Photography">
+                                </div>
+                                <div class="service-info">
+                                    <h3>Wedding Photography</h3>
+                                    <p>Timeless wedding coverage from ceremony to reception.</p>
+                                    <span class="price">€1000 – €2000</span>
+                                </div>
+                            </a>
+
+                            <a href="/services/automotive" class="service-card">
+                                <div class="service-img-wrap">
+                                    <img src="images/automotive.jpg" alt="Automotive Photography">
+                                </div>
+                                <div class="service-info">
+                                    <h3>Automotive Photography</h3>
+                                    <p>Stunning car shots for dealerships, marketing, and editorial use.</p>
+                                    <span class="price">€800 – €1500</span>
+                                </div>
+                            </a>
+
+                            <a href="/services/portrait" class="service-card">
+                                <div class="service-img-wrap">
+                                    <img src="images/portrait.jpg" alt="Portrait Sessions">
+                                </div>
+                                <div class="service-info">
+                                    <h3>Portrait Sessions</h3>
+                                    <p>Professional headshots and personal portraits in studio or on location.</p>
+                                    <span class="price">€150 – €300</span>
+                                </div>
+                            </a>
+
+                            <a href="/services" class="service-card service-seemore">
+                                <div class="seemore-content">
+                                    <div class="seemore-arrow">→</div>
+                                    <p>See All</p>
+                                    <p>Services</p>
+                                </div>
+                            </a>
+
+                        </div>
+                    </div>
+                </div>
+
+                <div class="products" id="products">
+                    <div class="container">
+                        <p class="section-label">Gears That I Use Everyday</p>
+                        <h2>Products</h2>
+                        <div class="products-grid">
+
+                            <a href="/products" class="product-card">
+                                <div class="product-img-wrap">
+                                    <img src="images/a7m3.jpg" alt="Sony A7 III">
+                                </div>
+                                <div class="product-info">
+                                    <span class="product-tag">Camera Body</span>
+                                    <h3>Sony A7 III</h3>
+                                    <p>Full-frame mirrorless. My primary shooting body for everything.</p>
+                                    <span class="price">€1,299</span>
+                                </div>
+                            </a>
+
+                            <a href="/products" class="product-card">
+                                <div class="product-img-wrap">
+                                    <img src="images/200600.jpg" alt="Sony 200-600mm G">
+                                </div>
+                                <div class="product-info">
+                                    <span class="product-tag">Lens</span>
+                                    <h3>Sony 200-600mm G</h3>
+                                    <p>My go-to for sports and action. Reaches far without losing sharpness.</p>
+                                    <span class="price">€1,548</span>
+                                </div>
+                            </a>
+
+                            <a href="/products" class="product-card">
+                                <div class="product-img-wrap">
+                                    <img src="images/50mm.jpg" alt="Sony 50mm f1.8">
+                                </div>
+                                <div class="product-info">
+                                    <span class="product-tag">Lens</span>
+                                    <h3>Sony 50mm f1.8</h3>
+                                    <p>Lightweight and sharp. Perfect for portraits and everyday shooting.</p>
+                                    <span class="price">€179</span>
+                                </div>
+                            </a>
+
+                            <a href="/products" class="product-card">
+                                <div class="product-img-wrap">
+                                    <img src="images/rs3mini.jpg" alt="DJI RS3 Mini">
+                                </div>
+                                <div class="product-info">
+                                    <span class="product-tag">Stabiliser</span>
+                                    <h3>DJI RS3 Mini</h3>
+                                    <p>Compact gimbal that keeps footage smooth without the bulk.</p>
+                                    <span class="price">€209</span>
+                                </div>
+                            </a>
+
+                            <a href="/products" class="product-card product-seemore">
+                                <div class="seemore-content">
+                                    <div class="seemore-arrow">→</div>
+                                    <p>See All</p>
+                                    <p>Products</p>
+                                </div>
+                            </a>
+
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // ─── PRODUCTS ────────────────────────────────────────────────────────────
+
+        let allProducts = [];
+        let currentCategory = 'all';
+        let searchTimeout;
+
+        function renderProducts() {
+            document.title = 'Products – Arpith Binsa';
+            document.getElementById('app').innerHTML = `
+                <div class="page-hero">
+                    <div class="container">
+                        <p class="section-label">Gear I Personally Use</p>
+                        <h1>Products</h1>
+                    </div>
+                </div>
+
+                <div class="products-page">
+                    <div class="container">
+
+                        <div class="products-controls">
+                            <div class="search-wrap">
+                                <input type="text" id="search-input" class="text-input search-input"
+                                    placeholder="Search products..." oninput="handleSearch()">
+                            </div>
+                            <div class="filter-tabs">
+                                <button class="filter-btn active" onclick="filterProducts('all', this)">All</button>
+                                <button class="filter-btn" onclick="filterProducts('camera', this)">Cameras</button>
+                                <button class="filter-btn" onclick="filterProducts('lens', this)">Lenses</button>
+                                <button class="filter-btn" onclick="filterProducts('stabiliser', this)">Stabilisers</button>
+                                <button class="filter-btn" onclick="filterProducts('bag', this)">Bags</button>
+                                <button class="filter-btn" onclick="filterProducts('accessory', this)">Accessories</button>
+                            </div>
+                        </div>
+
+                        <div id="loading" class="loading-state">Loading products...</div>
+                        <div class="products-listing" id="products-listing" style="display:none"></div>
+                        <div id="products-empty" class="cart-empty-box" style="display:none">
+                            <p>No products found.</p>
+                        </div>
+
+                    </div>
+                </div>
+            `;
+
+            currentCategory = 'all';
+            loadProducts();
+        }
+
+        async function loadProducts(search = '') {
+            const loading = document.getElementById('loading');
+            const listing = document.getElementById('products-listing');
+            const empty = document.getElementById('products-empty');
+            if (!loading) return;
+
+            loading.style.display = 'block';
+            listing.style.display = 'none';
+            empty.style.display = 'none';
+
+            try {
+                let url = `${API}/products`;
+                const params = [];
+                if (search) params.push(`search=${encodeURIComponent(search)}`);
+                if (currentCategory !== 'all') params.push(`category=${currentCategory}`);
+                if (params.length) url += '?' + params.join('&');
+
+                const res = await fetch(url);
+                const products = await res.json();
+                allProducts = products;
+
+                loading.style.display = 'none';
+
+                if (products.length === 0) {
+                    empty.style.display = 'block';
+                    return;
+                }
+
+                listing.style.display = 'flex';
+                listing.innerHTML = products.map(product => `
+                    <div class="product-listing-card">
+                        <div class="product-listing-img-wrap" onclick="goToProduct('${product._id}')" style="cursor:pointer">
+                            <img src="${product.image}" alt="${product.name}"
+                                onerror="this.src='images/favicon (1) (1).png'">
+                        </div>
+                        <div class="product-listing-info">
+                            <span class="product-tag">${product.category}</span>
+                            <h3 onclick="goToProduct('${product._id}')" style="cursor:pointer">${product.name}</h3>
+                            <p>${product.description}</p>
+                            <div class="product-listing-bottom">
+                                <span class="product-listing-price">€${product.price.toLocaleString()}</span>
+                                <div class="qty-add">
+                                    <div class="quantity-control">
+                                        <button onclick="changeQty('${product._id}', -1)">−</button>
+                                        <span id="qty-${product._id}">1</span>
+                                        <button onclick="changeQty('${product._id}', 1)">+</button>
+                                    </div>
+                                    <button class="btn-add-cart"
+                                        onclick="addToCart('${product._id}', '${product.name}', ${product.price}, '${product.image}', parseInt(document.getElementById('qty-${product._id}').textContent))">
+                                        Add to Cart
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+
+            } catch (err) {
+                loading.style.display = 'none';
+                empty.style.display = 'block';
+                document.querySelector('#products-empty p').textContent =
+                    'Failed to load products. Is the server running?';
+            }
+        }
+
+        function changeQty(id, direction) {
+            const el = document.getElementById('qty-' + id);
+            let val = parseInt(el.textContent);
+            el.textContent = Math.max(1, val + direction);
+        }
+
+        function handleSearch() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                const search = document.getElementById('search-input').value;
+                loadProducts(search);
+            }, 400);
+        }
+
+        function filterProducts(category, btn) {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentCategory = category;
+            const search = document.getElementById('search-input').value;
+            loadProducts(search);
+        }
+
+        function goToProduct(id) {
+            navigate('/products/' + id);
+        }
+
+        // ─── PRODUCT DETAIL ──────────────────────────────────────────────────────
+
+        let productDetailQty = 1;
+        let productDetailPaypalRendered = false;
+        let productDetailData = null;
+
+        async function renderProductDetail(id) {
+            document.title = 'Product – Arpith Binsa';
+            productDetailQty = 1;
+            productDetailPaypalRendered = false;
+
+            document.getElementById('app').innerHTML = `
+                <div class="product-detail-page">
+                    <div class="container">
+                        <a href="/products" class="back-link">← Back to Products</a>
+                        <div id="product-loading" class="loading-state">Loading...</div>
+                        <div id="product-content" style="display:none">
+                            <div class="product-detail-grid">
+                                <div class="product-detail-left">
+                                    <div class="slider-main">
+                                        <div class="slider-img-wrap">
+                                            <img id="detail-img" src="" alt="">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="product-detail-right">
+                                    <span class="product-tag" id="detail-category"></span>
+                                    <h1 class="product-detail-title" id="detail-name"></h1>
+                                    <p class="product-detail-sub" id="detail-desc"></p>
+                                    <div class="product-detail-price" id="detail-price"></div>
+                                    <div class="product-specs" id="detail-specs"></div>
+                                    <div class="product-actions">
+                                        <div class="quantity-wrap">
+                                            <label>Quantity</label>
+                                            <div class="quantity-control">
+                                                <button onclick="changeDetailQty(-1)">−</button>
+                                                <span id="detail-qty">1</span>
+                                                <button onclick="changeDetailQty(1)">+</button>
+                                            </div>
+                                        </div>
+                                        <button class="btn-add-cart" id="detail-add-cart-btn">Add to Cart</button>
+                                        <div id="paypal-button-container"></div>
+                                        <div id="order-success" class="booking-success" style="display:none">
+                                            Order confirmed! You will receive an email shortly.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="product-error" style="display:none">
+                            <div class="cart-empty-box"><p>Product not found.</p></div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            try {
+                const res = await fetch(`${API}/products/${id}`);
+                if (!res.ok) throw new Error();
+                productDetailData = await res.json();
+
+                document.title = `${productDetailData.name} – Arpith Binsa`;
+                document.getElementById('detail-category').textContent = productDetailData.category;
+                document.getElementById('detail-name').textContent = productDetailData.name;
+                document.getElementById('detail-desc').textContent = productDetailData.description;
+                document.getElementById('detail-price').textContent = '€' + productDetailData.price.toLocaleString();
+                document.getElementById('detail-img').src = productDetailData.image;
+                document.getElementById('detail-img').alt = productDetailData.name;
+
+                if (productDetailData.specs && Object.keys(productDetailData.specs).length > 0) {
+                    document.getElementById('detail-specs').innerHTML = `
+                        <h3>Technical Details</h3>
+                        <table class="specs-table">
+                            ${Object.entries(productDetailData.specs).map(([k, v]) => `
+                                <tr><td>${k}</td><td>${v}</td></tr>
+                            `).join('')}
+                        </table>
+                    `;
+                }
+
+                document.getElementById('detail-add-cart-btn').onclick = () => {
+                    addToCart(productDetailData._id, productDetailData.name, productDetailData.price, productDetailData.image, productDetailQty);
+                };
+
+                document.getElementById('product-loading').style.display = 'none';
+                document.getElementById('product-content').style.display = 'block';
+
+                loadPayPalSDK(renderDetailPayPal);
+
+            } catch (err) {
+                document.getElementById('product-loading').style.display = 'none';
+                document.getElementById('product-error').style.display = 'block';
+            }
+        }
+
+        function changeDetailQty(direction) {
+            productDetailQty = Math.max(1, productDetailQty + direction);
+            document.getElementById('detail-qty').textContent = productDetailQty;
+        }
+
+        function renderDetailPayPal() {
+            if (productDetailPaypalRendered) return;
+            productDetailPaypalRendered = true;
+
+            paypal.Buttons({
+                createOrder: function (data, actions) {
+                    return actions.order.create({
+                        purchase_units: [{
+                            amount: { value: (productDetailData.price * productDetailQty).toString(), currency_code: 'EUR' },
+                            description: `${productDetailData.name} x${productDetailQty}`
+                        }]
+                    });
+                },
+                onApprove: function (data, actions) {
+                    return actions.order.capture().then(function (details) {
+                        const token = localStorage.getItem('token');
+                        if (token) {
+                            fetch(`${API}/orders`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                                body: JSON.stringify({
+                                    items: [{ name: productDetailData.name, price: productDetailData.price, qty: productDetailQty, image: productDetailData.image }],
+                                    total: productDetailData.price * productDetailQty,
+                                    paypalOrderId: details.id
+                                })
+                            });
+                        }
+                        document.getElementById('paypal-button-container').style.display = 'none';
+                        document.getElementById('order-success').style.display = 'block';
+                    });
+                },
+                onError: function () { alert('Payment failed. Please try again.'); },
+                style: { color: 'gold', shape: 'pill', label: 'buynow', height: 50 }
+            }).render('#paypal-button-container');
+        }
+
+        // ─── SERVICE DETAIL ──────────────────────────────────────────────────────
+        // Renders one service's page: title, description, price, an image slider
+        // and a "Book Now" button that opens a booking modal with a PayPal
+        // button. Recreates the old per-service HTML pages inside the SPA.
+
+        let serviceSlides = [];
+        let serviceCurrent = 0;
+        let serviceDetailPaypalRendered = false;
+        let currentService = null;
+
+        function renderServiceDetail(slug) {
+            const svc = SERVICES[slug];
+            if (!svc) { renderNotFound(); return; }
+
+            currentService = svc;
+            serviceCurrent = 0;
+            serviceDetailPaypalRendered = false;
+
+            // Build the list of slider image paths (prefix + 1..count).
+            serviceSlides = [];
+            for (let i = 1; i <= svc.imageCount; i++) {
+                serviceSlides.push(`${svc.imagePrefix}${i}.jpg`);
+            }
+
+            document.title = `${svc.label} – Arpith Binsa`;
+
+            const thumbs = serviceSlides.map((src, i) => `
+                <div class="thumb ${i === 0 ? 'active' : ''}" onclick="goToServiceSlide(${i})">
+                    <img src="${src}" alt="">
+                </div>
+            `).join('');
+
+            const packageOptions = svc.packages.map(p =>
+                `<option value="${p.value}">${p.label}</option>`
+            ).join('');
+
+            document.getElementById('app').innerHTML = `
+                <div class="service-detail-hero">
+                    <div class="container">
+                        <a href="/services" class="back-link">← Back to Services</a>
+                        <p class="section-label">${svc.label}</p>
+                        <h1>${svc.title}</h1>
+                        <p class="service-detail-desc">${svc.desc}</p>
+                        <div class="service-detail-price">${svc.priceRange}</div>
+                        <button class="book-now-btn" onclick="openServiceModal()">Book Now</button>
+                    </div>
+                </div>
+
+                <div class="slider-section">
+                    <div class="container">
+                        <div class="slider-wrapper">
+                            <div class="slider-main">
+                                <button class="slider-btn slider-prev" onclick="changeServiceSlide(-1)">&#8592;</button>
+                                <div class="slider-img-wrap">
+                                    <img id="slider-img" src="${serviceSlides[0]}" alt="${svc.label}">
+                                </div>
+                                <button class="slider-btn slider-next" onclick="changeServiceSlide(1)">&#8594;</button>
+                            </div>
+                            <div class="slider-counter">
+                                <span id="slider-current">1</span> / <span id="slider-total">${svc.imageCount}</span>
+                            </div>
+                            <div class="slider-thumbs">${thumbs}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="booking-modal" class="modal-overlay" style="display:none">
+                    <div class="modal-box">
+                        <button class="modal-close" onclick="closeServiceModal()">×</button>
+                        <h2>${svc.bookingTitle}</h2>
+                        <p>Fill in your details and complete payment to confirm.</p>
+                        <div class="modal-body">
+                            <div class="modal-left">
+                                <div class="form-group">
+                                    <label>Your Name</label>
+                                    <input type="text" id="booking-name" class="text-input" placeholder="Enter your name">
+                                </div>
+                                <div class="form-group">
+                                    <label>Your Email</label>
+                                    <input type="email" id="booking-email" class="text-input" placeholder="Enter your email">
+                                </div>
+                                <div class="form-group">
+                                    <label>Select Date</label>
+                                    <input type="date" id="booking-date" class="date-input">
+                                </div>
+                                <div class="form-group">
+                                    <label>Select Package</label>
+                                    <select id="booking-package" class="select-input" onchange="updateServicePrice()">
+                                        ${packageOptions}
+                                    </select>
+                                </div>
+                                <div class="price-display">
+                                    Total: <span id="total-price">€${svc.packages[0].value}</span>
+                                </div>
+                            </div>
+                            <div class="modal-right">
+                                <p class="payment-label">Complete Payment</p>
+                                <div id="paypal-button-container"></div>
+                                <div id="booking-success" class="booking-success" style="display:none">
+                                    Booking confirmed! You will receive an email shortly.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Close modal when clicking the dark overlay (but not the box).
+            document.getElementById('booking-modal').addEventListener('click', function (e) {
+                if (e.target === this) closeServiceModal();
+            });
+        }
+
+        function changeServiceSlide(direction) {
+            serviceCurrent = (serviceCurrent + direction + serviceSlides.length) % serviceSlides.length;
+            updateServiceSlider();
+        }
+
+        function goToServiceSlide(index) {
+            serviceCurrent = index;
+            updateServiceSlider();
+        }
+
+        function updateServiceSlider() {
+            document.getElementById('slider-img').src = serviceSlides[serviceCurrent];
+            document.getElementById('slider-current').textContent = serviceCurrent + 1;
+            document.querySelectorAll('.thumb').forEach((t, i) => {
+                t.classList.toggle('active', i === serviceCurrent);
+            });
+        }
+
+        function openServiceModal() {
+            document.getElementById('booking-modal').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+            // Render the PayPal button lazily the first time the modal opens.
+            loadPayPalSDK(renderServicePayPal);
+        }
+
+        function closeServiceModal() {
+            document.getElementById('booking-modal').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        function updateServicePrice() {
+            const price = document.getElementById('booking-package').value;
+            document.getElementById('total-price').textContent = '€' + Number(price).toLocaleString();
+        }
+
+        function validateBookingForm() {
+            const date = document.getElementById('booking-date').value;
+            const name = document.getElementById('booking-name').value.trim();
+            const email = document.getElementById('booking-email').value.trim();
+            if (!date || !name || !email) {
+                alert('Please fill in all fields before paying.');
+                return false;
+            }
+            return true;
+        }
+
+        function renderServicePayPal() {
+            if (serviceDetailPaypalRendered) return;
+            serviceDetailPaypalRendered = true;
+
+            paypal.Buttons({
+                createOrder: function (data, actions) {
+                    // Returning undefined here makes the PayPal SDK throw an
+                    // internal error. actions.reject() cleanly cancels instead.
+                    if (!validateBookingForm()) return actions.reject();
+                    const price = document.getElementById('booking-package').value;
+                    return actions.order.create({
+                        purchase_units: [{
+                            amount: { value: String(price), currency_code: (paypalConfig && paypalConfig.currency) || 'EUR' },
+                            description: `${currentService.orderLabel} – Arpith Binsa`
+                        }]
+                    });
+                },
+                onApprove: function (data, actions) {
+                    return actions.order.capture().then(function (details) {
+                        const token = localStorage.getItem('token');
+                        const price = parseInt(document.getElementById('booking-package').value, 10);
+                        if (token) {
+                            fetch(`${API}/orders`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                                body: JSON.stringify({
+                                    items: [{
+                                        name: currentService.orderLabel,
+                                        price: price,
+                                        qty: 1,
+                                        image: `${currentService.imagePrefix}1.jpg`
+                                    }],
+                                    total: price,
+                                    paypalOrderId: details.id
+                                })
+                            });
+                        }
+                        document.getElementById('paypal-button-container').style.display = 'none';
+                        document.getElementById('booking-success').style.display = 'block';
+                    });
+                },
+                onError: function () { alert('Payment failed. Please try again.'); },
+                style: { color: 'gold', shape: 'pill', label: 'buynow', height: 50 }
+            }).render('#paypal-button-container');
+        }
+
+        // ─── SERVICES ────────────────────────────────────────────────────────────
+
+        function renderServices() {
+            document.title = 'Services – Arpith Binsa';
+            document.getElementById('app').innerHTML = `
+                <div class="page-hero">
+                    <div class="container">
+                        <p class="section-label">What I Offer</p>
+                        <h1>Services</h1>
+                    </div>
+                </div>
+
+                <div class="services-list">
+                    <div class="container">
+                        <div class="services-grid">
+
+                            <a href="/services/football" class="service-card">
+                                <div class="service-img-wrap">
+                                    <img src="images/services/football1.jpg" alt="Sports Photography">
+                                </div>
+                                <div class="service-info">
+                                    <h3>Sports Photography</h3>
+                                    <p>Football, athletics and action shots that capture the energy of the moment.</p>
+                                    <span class="price">€200 – €500</span>
+                                </div>
+                            </a>
+
+                            <a href="/services/wedding" class="service-card">
+                                <div class="service-img-wrap">
+                                    <img src="images/wedding.jpg" alt="Wedding Photography">
+                                </div>
+                                <div class="service-info">
+                                    <h3>Wedding Photography</h3>
+                                    <p>Timeless wedding coverage from ceremony to reception.</p>
+                                    <span class="price">€1000 – €2000</span>
+                                </div>
+                            </a>
+
+                            <a href="/services/automotive" class="service-card">
+                                <div class="service-img-wrap">
+                                    <img src="images/automotive.jpg" alt="Automotive Photography">
+                                </div>
+                                <div class="service-info">
+                                    <h3>Automotive Photography</h3>
+                                    <p>Stunning car shots for dealerships, marketing, and editorial use.</p>
+                                    <span class="price">€800 – €1500</span>
+                                </div>
+                            </a>
+
+                            <a href="/services/portrait" class="service-card">
+                                <div class="service-img-wrap">
+                                    <img src="images/portrait.jpg" alt="Portrait Sessions">
+                                </div>
+                                <div class="service-info">
+                                    <h3>Portrait Sessions</h3>
+                                    <p>Professional headshots and personal portraits in studio or on location.</p>
+                                    <span class="price">€150 – €300</span>
+                                </div>
+                            </a>
+
+                            <a href="/services/fashion" class="service-card">
+                                <div class="service-img-wrap">
+                                    <img src="images/fashion.jpg" alt="Fashion Shoots">
+                                </div>
+                                <div class="service-info">
+                                    <h3>Fashion Shoots</h3>
+                                    <p>Creative fashion photography for lookbooks, editorials and portfolios.</p>
+                                    <span class="price">€500 – €1200</span>
+                                </div>
+                            </a>
+
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // ─── ADD PRODUCT ─────────────────────────────────────────────────────────
+
+        function renderAddProduct() {
+            document.title = 'Add Product – Arpith Binsa';
+
+            const token = localStorage.getItem('token');
+            const user = JSON.parse(localStorage.getItem('user'));
+
+            if (!token || !user || user.role === 'user') {
+                navigate('/account');
+                return;
+            }
+
+            document.getElementById('app').innerHTML = `
+                <div class="page-hero">
+                    <div class="container">
+                        <p class="section-label">Manage Products</p>
+                        <h1>Add Product</h1>
+                    </div>
+                </div>
+
+                <div class="add-product-page">
+                    <div class="container">
+                        <div class="add-product-grid">
+
+                            <div class="add-product-form">
+                                <h2>Product Details</h2>
+
+                                <div class="form-group">
+                                    <label>Product Name</label>
+                                    <input type="text" id="prod-name" class="text-input" placeholder="eg: Sony A7 III"
+                                        oninput="document.getElementById('preview-name').textContent = this.value || 'Product Name'">
+                                </div>
+                                <div class="form-group">
+                                    <label>Description</label>
+                                    <textarea id="prod-desc" class="text-input textarea-input"
+                                        placeholder="Describe the product..." rows="4"
+                                        oninput="document.getElementById('preview-desc').textContent = this.value || 'Product description will appear here.'"></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label>Price (€)</label>
+                                    <input type="number" id="prod-price" class="text-input" placeholder="eg: 1299"
+                                        oninput="document.getElementById('preview-price').textContent = this.value ? '€' + Number(this.value).toLocaleString() : '€0'">
+                                </div>
+                                <div class="form-group">
+                                    <label>Category</label>
+                                    <select id="prod-category" class="select-input"
+                                        onchange="document.getElementById('preview-category').textContent = this.value || 'Category'">
+                                        <option value="">Select category</option>
+                                        <option value="camera">Camera</option>
+                                        <option value="lens">Lens</option>
+                                        <option value="stabiliser">Stabiliser</option>
+                                        <option value="bag">Bag</option>
+                                        <option value="accessory">Accessory</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Image Path</label>
+                                    <input type="text" id="prod-image" class="text-input"
+                                        placeholder="eg: images/products/a7m3_1.jpg"
+                                        oninput="document.getElementById('preview-img').src = this.value">
+                                </div>
+                                <div class="form-group">
+                                    <label>Technical Specs (optional)</label>
+                                    <div id="specs-list">
+                                        <div class="spec-row">
+                                            <input type="text" class="text-input spec-key" placeholder="eg: Brand">
+                                            <input type="text" class="text-input spec-value" placeholder="eg: Sony">
+                                            <button class="remove-spec" onclick="removeSpec(this)">×</button>
+                                        </div>
+                                    </div>
+                                    <button class="add-spec-btn" onclick="addSpec()">+ Add Spec</button>
+                                </div>
+
+                                <div id="form-error" class="auth-error" style="display:none"></div>
+                                <div id="form-success" class="booking-success" style="display:none">
+                                    Product added successfully!
+                                </div>
+
+                                <button class="auth-submit-btn" onclick="submitProduct()">Add Product</button>
+                            </div>
+
+                            <div class="add-product-preview">
+                                <h2>Preview</h2>
+                                <div class="product-listing-card" style="flex-direction:column">
+                                    <div class="product-listing-img-wrap" style="width:100%;height:240px">
+                                        <img id="preview-img" src="images/favicon (1) (1).png" alt="Preview">
+                                    </div>
+                                    <div class="product-listing-info" style="padding:20px">
+                                        <span class="product-tag" id="preview-category">Category</span>
+                                        <h3 id="preview-name">Product Name</h3>
+                                        <p id="preview-desc">Product description will appear here.</p>
+                                        <div class="product-listing-bottom">
+                                            <span class="product-listing-price" id="preview-price">€0</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function addSpec() {
+            const row = document.createElement('div');
+            row.className = 'spec-row';
+            row.innerHTML = `
+                <input type="text" class="text-input spec-key" placeholder="eg: Weight">
+                <input type="text" class="text-input spec-value" placeholder="eg: 650g">
+                <button class="remove-spec" onclick="removeSpec(this)">×</button>
+            `;
+            document.getElementById('specs-list').appendChild(row);
+        }
+
+        function removeSpec(btn) {
+            btn.parentElement.remove();
+        }
+
+        async function submitProduct() {
+            const token = localStorage.getItem('token');
+            const errorEl = document.getElementById('form-error');
+            const successEl = document.getElementById('form-success');
+
+            const name = document.getElementById('prod-name').value.trim();
+            const description = document.getElementById('prod-desc').value.trim();
+            const price = document.getElementById('prod-price').value;
+            const category = document.getElementById('prod-category').value;
+            const image = document.getElementById('prod-image').value.trim();
+
+            if (!name || !description || !price || !category) {
+                errorEl.textContent = 'Please fill in all required fields.';
+                errorEl.style.display = 'block';
+                successEl.style.display = 'none';
+                return;
+            }
+
+            const specs = {};
+            document.querySelectorAll('.spec-row').forEach(row => {
+                const key = row.querySelector('.spec-key').value.trim();
+                const value = row.querySelector('.spec-value').value.trim();
+                if (key && value) specs[key] = value;
+            });
+
+            try {
+                const res = await fetch(`${API}/products`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ name, description, price: Number(price), category, image, specs })
+                });
+
+                const data = await res.json();
+
+                if (!res.ok) {
+                    errorEl.textContent = data.message || 'Failed to add product.';
+                    errorEl.style.display = 'block';
+                    successEl.style.display = 'none';
+                    return;
+                }
+
+                errorEl.style.display = 'none';
+                successEl.style.display = 'block';
+
+                document.getElementById('prod-name').value = '';
+                document.getElementById('prod-desc').value = '';
+                document.getElementById('prod-price').value = '';
+                document.getElementById('prod-category').value = '';
+                document.getElementById('prod-image').value = '';
+                document.getElementById('specs-list').innerHTML = `
+                    <div class="spec-row">
+                        <input type="text" class="text-input spec-key" placeholder="eg: Brand">
+                        <input type="text" class="text-input spec-value" placeholder="eg: Sony">
+                        <button class="remove-spec" onclick="removeSpec(this)">×</button>
+                    </div>
+                `;
+
+            } catch (err) {
+                errorEl.textContent = 'Something went wrong. Is the server running?';
+                errorEl.style.display = 'block';
+            }
+        }
+
+        // ─── CART ────────────────────────────────────────────────────────────────
+
+        let paypalRendered = false;
+
+        function renderCart() {
+            document.title = 'Cart – Arpith Binsa';
+            paypalRendered = false;
+
+            document.getElementById('app').innerHTML = `
+                <div class="cart-page">
+                    <div class="container">
+                        <div class="page-hero" style="padding: 140px 0 40px">
+                            <p class="section-label">Your Selection</p>
+                            <h1>Cart</h1>
+                        </div>
+
+                        <div class="cart-layout" id="cart-layout">
+                            <div class="cart-items" id="cart-items"></div>
+
+                            <div class="cart-summary-box">
+                                <h2>Order Summary</h2>
+                                <div class="summary-row">
+                                    <span>Items</span>
+                                    <span id="summary-count">0</span>
+                                </div>
+                                <div class="summary-row">
+                                    <span>Subtotal</span>
+                                    <span id="summary-subtotal">€0</span>
+                                </div>
+                                <div class="summary-row summary-total">
+                                    <span>Total</span>
+                                    <span id="summary-total">€0</span>
+                                </div>
+                                <div id="paypal-button-container"></div>
+                                <button class="btn-clear-cart" onclick="clearCart(); refreshCartItems();">
+                                    Clear Cart
+                                </button>
+                                <div id="order-success" class="booking-success" style="display:none">
+                                    Order confirmed! You will receive an email shortly.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="cart-empty" style="display:none">
+                            <div class="cart-empty-box">
+                                <p>Your cart is empty.</p>
+                                <a href="/products" class="btn-primary"
+                                    style="background:#111; color:#fff; margin-top:16px; display:inline-block">
+                                    Browse Products
+                                </a>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            `;
+
+            refreshCartItems();
+        }
+
+        function refreshCartItems() {
+            const cart = getCart();
+            const items = Object.values(cart);
+            const container = document.getElementById('cart-items');
+            const emptyState = document.getElementById('cart-empty');
+            const cartLayout = document.getElementById('cart-layout');
+
+            if (items.length === 0) {
+                cartLayout.style.display = 'none';
+                emptyState.style.display = 'block';
+                return;
+            }
+
+            cartLayout.style.display = 'grid';
+            emptyState.style.display = 'none';
+
+            container.innerHTML = items.map(item => `
+                <div class="cart-item" id="item-${item.id}">
+                    <div class="cart-item-img">
+                        <img src="${item.image}" alt="${item.name}">
+                    </div>
+                    <div class="cart-item-info">
+                        <h3>${item.name}</h3>
+                        <p class="cart-item-price">€${item.price.toLocaleString()}</p>
+                        <div class="quantity-control" style="margin-top: 12px">
+                            <button onclick="changeCartItemQty('${item.id}', ${item.qty - 1})">−</button>
+                            <span>${item.qty}</span>
+                            <button onclick="changeCartItemQty('${item.id}', ${item.qty + 1})">+</button>
+                        </div>
+                    </div>
+                    <div class="cart-item-right">
+                        <p class="cart-item-total">€${(item.price * item.qty).toLocaleString()}</p>
+                        <button class="cart-remove" onclick="removeCartItem('${item.id}')">Remove</button>
+                    </div>
+                </div>
+            `).join('');
+
+            updateCartSummary();
+            loadPayPalSDK(renderPayPalButtons);
+        }
+
+        function changeCartItemQty(id, newQty) {
+            updateQty(id, newQty);
+            refreshCartItems();
+        }
+
+        function removeCartItem(id) {
+            removeFromCart(id);
+            refreshCartItems();
+        }
+
+        function updateCartSummary() {
+            const count = getCartCount();
+            const total = getCartTotal();
+            document.getElementById('summary-count').textContent = count;
+            document.getElementById('summary-subtotal').textContent = '€' + total.toLocaleString();
+            document.getElementById('summary-total').textContent = '€' + total.toLocaleString();
+        }
+
+        // The PayPal client-id is fetched at runtime from /api/config, which
+        // reads it from a server environment variable. This keeps the key in a
+        // single place (no hard-coded id spread across files) and lets it be
+        // rotated without editing the frontend. The client-id is a public value
+        // by design; the PayPal SECRET is never sent to the browser.
+        let paypalConfig = null;
+
+        // Writes a visible message into the PayPal button area so a missing or
+        // failed configuration is obvious on screen, not just in the console.
+        function showPayPalNotice(message) {
+            const box = document.getElementById('paypal-button-container');
+            if (box) box.innerHTML = `<p class="paypal-notice">${message}</p>`;
+        }
+
+        async function loadPayPalSDK(callback) {
+            // Orders are only saved to history for logged-in users (the order
+            // is tied to the account). Say so up front so a successful sandbox
+            // payment that "vanishes" is not mistaken for a bug.
+            const box = document.getElementById('paypal-button-container');
+            if (box && !localStorage.getItem('token') && !document.getElementById('paypal-login-hint')) {
+                box.insertAdjacentHTML('beforebegin',
+                    '<p id="paypal-login-hint" class="paypal-notice">You are not logged in. Payment will work, but the order will only appear in your history if you <a href="/account">log in</a> first.</p>');
+            }
+            if (window.paypal) {
+                callback();
+                return;
+            }
+            try {
+                if (!paypalConfig) {
+                    const res = await fetch(`${API}/config`);
+                    paypalConfig = await res.json();
+                }
+                if (!paypalConfig.paypalClientId) {
+                    console.error('PayPal client-id is not configured on the server.');
+                    showPayPalNotice('Payments are not configured yet. Set PAYPAL_CLIENT_ID in the server .env file.');
+                    return;
+                }
+                const script = document.createElement('script');
+                const currency = encodeURIComponent(paypalConfig.currency || 'EUR');
+                const clientId = encodeURIComponent(paypalConfig.paypalClientId);
+                script.src = `https://www.paypal.com/sdk/js?client-id=${clientId}&currency=${currency}`;
+                script.onload = callback;
+                script.onerror = () => {
+                    console.error('Failed to load the PayPal SDK.');
+                    showPayPalNotice('Could not load PayPal. Check your internet connection and that the client-id is valid.');
+                };
+                document.head.appendChild(script);
+            } catch (err) {
+                console.error('Could not load payment configuration:', err);
+                showPayPalNotice('Could not load payment configuration. Is the server running?');
+            }
+        }
+
+        function renderPayPalButtons() {
+            if (paypalRendered) return;
+            paypalRendered = true;
+
+            paypal.Buttons({
+                createOrder: function (data, actions) {
+                    const total = getCartTotal();
+                    const itemList = Object.values(getCart()).map(i => `${i.name} x${i.qty}`).join(', ');
+                    return actions.order.create({
+                        purchase_units: [{ amount: { value: total.toString(), currency_code: 'EUR' }, description: itemList }]
+                    });
+                },
+                onApprove: function (data, actions) {
+                    return actions.order.capture().then(function (details) {
+                        const token = localStorage.getItem('token');
+                        const cart = getCart();
+                        const total = getCartTotal();
+                        if (token) {
+                            fetch(`${API}/orders`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                                body: JSON.stringify({ items: Object.values(cart), total, paypalOrderId: details.id })
+                            });
+                        }
+                        clearCart();
+                        document.getElementById('paypal-button-container').style.display = 'none';
+                        document.getElementById('order-success').style.display = 'block';
+                        document.getElementById('cart-items').style.display = 'none';
+                    });
+                },
+                onError: function () {
+                    alert('Payment failed. Please try again.');
+                },
+                style: { color: 'gold', shape: 'pill', label: 'buynow', height: 50 }
+            }).render('#paypal-button-container');
+        }
+
+        // ─── CONTACT ─────────────────────────────────────────────────────────────
+
+        function renderContact() {
+            document.title = 'Contact – Arpith Binsa';
+            document.getElementById('app').innerHTML = `
+                <div class="page-hero">
+                    <div class="container">
+                        <p class="section-label">Get In Touch</p>
+                        <h1>Contact</h1>
+                    </div>
+                </div>
+
+                <div class="contact-page">
+                    <div class="container">
+                        <div class="contact-grid">
+
+                            <div class="contact-form-wrap">
+                                <h2>Send a Message</h2>
+                                <p>Have a project in mind or want to book a shoot? Fill in the form and I'll get back to you.</p>
+
+                                <div class="form-group">
+                                    <label>Your Name</label>
+                                    <input type="text" id="contact-name" class="text-input" placeholder="Enter your name">
+                                </div>
+                                <div class="form-group">
+                                    <label>Your Email</label>
+                                    <input type="email" id="contact-email" class="text-input" placeholder="Enter your email">
+                                </div>
+                                <div class="form-group">
+                                    <label>Subject</label>
+                                    <select id="contact-subject" class="select-input">
+                                        <option value="">Select a subject</option>
+                                        <option value="booking">Photography Booking</option>
+                                        <option value="product">Product Enquiry</option>
+                                        <option value="collaboration">Collaboration</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Message</label>
+                                    <textarea id="contact-message" class="text-input textarea-input"
+                                        placeholder="Tell me about your project..." rows="5"></textarea>
+                                </div>
+
+                                <div id="contact-error" class="auth-error" style="display:none"></div>
+                                <div id="contact-success" class="booking-success" style="display:none">
+                                    Message sent! I'll get back to you soon.
+                                </div>
+
+                                <button class="auth-submit-btn" onclick="sendMessage()">Send Message</button>
+                            </div>
+
+                            <div class="contact-info">
+                                <h2>Contact Info</h2>
+                                <p>Based in Berlin, available worldwide for shoots and collaborations.</p>
+
+                                <div class="contact-info-list">
+                                    <div class="contact-info-item">
+                                        <span class="contact-info-icon">📍</span>
+                                        <div>
+                                            <p class="contact-info-label">Location</p>
+                                            <p class="contact-info-value">Berlin, Germany</p>
+                                        </div>
+                                    </div>
+                                    <div class="contact-info-item">
+                                        <span class="contact-info-icon">📧</span>
+                                        <div>
+                                            <p class="contact-info-label">Email</p>
+                                            <p class="contact-info-value">admin@arpithbinsa.com</p>
+                                        </div>
+                                    </div>
+                                    <div class="contact-info-item">
+                                        <span class="contact-info-icon">📷</span>
+                                        <div>
+                                            <p class="contact-info-label">Instagram</p>
+                                            <p class="contact-info-value">@arpith_knipst</p>
+                                        </div>
+                                    </div>
+                                    <div class="contact-info-item">
+                                        <span class="contact-info-icon">🌐</span>
+                                        <div>
+                                            <p class="contact-info-label">Website</p>
+                                            <p class="contact-info-value">arpithbinsa.com</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // ─── ACCOUNT ─────────────────────────────────────────────────────────────
+
+        function renderAccount() {
+            document.title = 'Account – Arpith Binsa';
+            document.getElementById('app').innerHTML = `
+                <div id="auth-section" class="auth-page" style="display:none">
+                    <div class="container">
+                        <div class="auth-box">
+
+                            <div class="auth-tabs">
+                                <button class="auth-tab active" onclick="switchTab('login')">Login</button>
+                                <button class="auth-tab" onclick="switchTab('register')">Register</button>
+                            </div>
+
+                            <div id="login-form">
+                                <h2>Welcome Back</h2>
+                                <p>Sign in to your account</p>
+                                <div class="form-group">
+                                    <label>Email</label>
+                                    <input type="email" id="login-email" class="text-input" placeholder="Enter your email">
+                                </div>
+                                <div class="form-group">
+                                    <label>Password</label>
+                                    <input type="password" id="login-password" class="text-input" placeholder="Enter your password">
+                                </div>
+                                <div id="login-error" class="auth-error" style="display:none"></div>
+                                <button class="auth-submit-btn" onclick="login()">Login</button>
+                            </div>
+
+                            <div id="register-form" style="display:none">
+                                <h2>Create Account</h2>
+                                <p>Join to track your orders</p>
+                                <div class="form-group">
+                                    <label>Full Name</label>
+                                    <input type="text" id="register-name" class="text-input" placeholder="Enter your name">
+                                </div>
+                                <div class="form-group">
+                                    <label>Email</label>
+                                    <input type="email" id="register-email" class="text-input" placeholder="Enter your email">
+                                </div>
+                                <div class="form-group">
+                                    <label>Password</label>
+                                    <input type="password" id="register-password" class="text-input" placeholder="Create a password">
+                                </div>
+                                <div id="register-error" class="auth-error" style="display:none"></div>
+                                <button class="auth-submit-btn" onclick="register()">Create Account</button>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <div id="account-section" style="display:none">
+                    <div class="page-hero">
+                        <div class="container">
+                            <p class="section-label">Your Account</p>
+                            <h1 id="account-name">Welcome</h1>
+                            <p id="account-email" style="color:#999; margin-top:8px; font-size:14px"></p>
+                            <button class="logout-btn" onclick="logout()">Log Out</button>
+                        </div>
+                    </div>
+
+                    <div class="orders-section">
+                        <div class="container">
+                            <h2>Order History</h2>
+                            <div id="orders-list"></div>
+                            <div id="orders-empty" style="display:none">
+                                <div class="cart-empty-box">
+                                    <p>No orders yet.</p>
+                                    <a href="/products" class="btn-primary"
+                                        style="background:#111; color:#fff; margin-top:16px; display:inline-block">
+                                        Shop Now
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            const token = localStorage.getItem('token');
+            if (token) {
+                showAccountSection();
+            } else {
+                showAuthSection();
+            }
+        }
+
+        function showAuthSection() {
+            document.getElementById('auth-section').style.display = 'block';
+            document.getElementById('account-section').style.display = 'none';
+        }
+
+        function showAccountSection() {
+            document.getElementById('auth-section').style.display = 'none';
+            document.getElementById('account-section').style.display = 'block';
+            const user = JSON.parse(localStorage.getItem('user'));
+            if (user) {
+                document.getElementById('account-name').textContent = `Hello, ${user.name}`;
+                document.getElementById('account-email').textContent = user.email;
+            }
+            loadOrders();
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            if (tab === 'login') {
+                document.getElementById('login-form').style.display = 'block';
+                document.getElementById('register-form').style.display = 'none';
+            } else {
+                document.getElementById('login-form').style.display = 'none';
+                document.getElementById('register-form').style.display = 'block';
+            }
+        }
+
+        async function login() {
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            const errorEl = document.getElementById('login-error');
+
+            if (!email || !password) {
+                errorEl.textContent = 'Please fill in all fields.';
+                errorEl.style.display = 'block';
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await res.json();
+                if (!res.ok) {
+                    errorEl.textContent = data.message || 'Login failed.';
+                    errorEl.style.display = 'block';
+                    return;
+                }
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('user', JSON.stringify(data.user));
+                showAccountSection();
+            } catch (err) {
+                errorEl.textContent = 'Something went wrong. Try again.';
+                errorEl.style.display = 'block';
+            }
+        }
+
+        async function register() {
+            const name = document.getElementById('register-name').value;
+            const email = document.getElementById('register-email').value;
+            const password = document.getElementById('register-password').value;
+            const errorEl = document.getElementById('register-error');
+
+            if (!name || !email || !password) {
+                errorEl.textContent = 'Please fill in all fields.';
+                errorEl.style.display = 'block';
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API}/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, email, password })
+                });
+                const data = await res.json();
+                if (!res.ok) {
+                    errorEl.textContent = data.message || 'Registration failed.';
+                    errorEl.style.display = 'block';
+                    return;
+                }
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('user', JSON.stringify(data.user));
+                showAccountSection();
+            } catch (err) {
+                errorEl.textContent = 'Something went wrong. Try again.';
+                errorEl.style.display = 'block';
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            showAuthSection();
+        }
+
+        async function loadOrders() {
+            const token = localStorage.getItem('token');
+            try {
+                const res = await fetch(`${API}/orders/my-orders`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const orders = await res.json();
+                const list = document.getElementById('orders-list');
+                const empty = document.getElementById('orders-empty');
+
+                if (!orders.length) {
+                    list.style.display = 'none';
+                    empty.style.display = 'block';
+                    return;
+                }
+
+                list.innerHTML = orders.map(order => `
+                    <div class="order-card">
+                        <div class="order-header">
+                            <div>
+                                <span class="order-id">Order #${order._id.slice(-6).toUpperCase()}</span>
+                                <span class="order-date">${new Date(order.createdAt).toLocaleDateString('en-GB', {
+                    day: 'numeric', month: 'long', year: 'numeric'
+                })}</span>
+                            </div>
+                            <div class="order-status">
+                                <span class="status-badge">${order.status}</span>
+                                <span class="order-total">€${order.total.toLocaleString()}</span>
+                            </div>
+                        </div>
+                        <div class="order-items">
+                            ${order.items.map(item => `
+                                <div class="order-item">
+                                    <div class="order-item-img">
+                                        <img src="${item.image}" alt="${item.name}">
+                                    </div>
+                                    <div class="order-item-info">
+                                        <p class="order-item-name">${item.name}</p>
+                                        <p class="order-item-meta">Qty: ${item.qty} · €${item.price.toLocaleString()}</p>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `).join('');
+
+            } catch (err) {
+                console.error('Failed to load orders:', err);
+            }
+        }
+
+        async function sendMessage() {
+            const name = document.getElementById('contact-name').value.trim();
+            const email = document.getElementById('contact-email').value.trim();
+            const subject = document.getElementById('contact-subject').value;
+            const message = document.getElementById('contact-message').value.trim();
+            const errorEl = document.getElementById('contact-error');
+            const successEl = document.getElementById('contact-success');
+
+            if (!name || !email || !subject || !message) {
+                errorEl.textContent = 'Please fill in all fields.';
+                errorEl.style.display = 'block';
+                successEl.style.display = 'none';
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API}/contact`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, email, subject, message })
+                });
+
+                const data = await res.json();
+
+                if (!res.ok) {
+                    errorEl.textContent = data.message || 'Failed to send message.';
+                    errorEl.style.display = 'block';
+                    return;
+                }
+
+                errorEl.style.display = 'none';
+                successEl.style.display = 'block';
+
+                document.getElementById('contact-name').value = '';
+                document.getElementById('contact-email').value = '';
+                document.getElementById('contact-subject').value = '';
+                document.getElementById('contact-message').value = '';
+
+            } catch (err) {
+                errorEl.textContent = 'Something went wrong. Is the server running?';
+                errorEl.style.display = 'block';
+            }
+        }
+    </script>
+
+</body>
+
+</html>
