@@ -17,7 +17,6 @@ function isValidId(id) {
     return mongoose.Types.ObjectId.isValid(id);
 }
 
-// GET ALL PRODUCTS
 router.get('/', async (req, res) => {
     try {
         let { search, category } = req.query;
@@ -42,7 +41,6 @@ router.get('/', async (req, res) => {
     }
 });
 
-// GET ONE PRODUCT
 router.get('/:id', async (req, res) => {
     try {
         if (!isValidId(req.params.id)) {
@@ -56,10 +54,9 @@ router.get('/:id', async (req, res) => {
     }
 });
 
-// ADD PRODUCT  (admin only)
+// Admin only.
 router.post('/', writeLimiter, authMiddleware, adminMiddleware, async (req, res) => {
     try {
-        // Strict schema: reject unexpected fields before doing anything else.
         const extra = Object.keys(req.body || {}).filter((k) => !ALLOWED_FIELDS.includes(k));
         if (extra.length) {
             return res.status(400).json({ message: `Unexpected field(s): ${extra.join(', ')}` });
@@ -106,7 +103,7 @@ router.post('/', writeLimiter, authMiddleware, adminMiddleware, async (req, res)
     }
 });
 
-// UPDATE PRODUCT  (admin only)
+// Admin only.
 router.put('/:id', writeLimiter, authMiddleware, adminMiddleware, async (req, res) => {
     try {
         if (!isValidId(req.params.id)) {
@@ -165,7 +162,7 @@ router.put('/:id', writeLimiter, authMiddleware, adminMiddleware, async (req, re
     }
 });
 
-// DELETE PRODUCT  (admin only)
+// Admin only.
 router.delete('/:id', writeLimiter, authMiddleware, adminMiddleware, async (req, res) => {
     try {
         if (!isValidId(req.params.id)) {

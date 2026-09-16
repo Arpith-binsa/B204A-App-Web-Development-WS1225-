@@ -1713,8 +1713,7 @@ body {
    color: #111;
 }
 
-/* Notices shown in the PayPal button area (missing config, SDK failure,
-   or a logged-out reminder). Kept quiet so they inform without alarming. */
+/* Notices shown in the PayPal button area (missing config, SDK failure, logged-out reminder). */
 .paypal-notice {
    font-size: 0.9rem;
    line-height: 1.5;

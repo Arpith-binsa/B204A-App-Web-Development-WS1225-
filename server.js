@@ -1,17 +1,4 @@
-// server.js — application entry point
-//
-// Security hardening in this file follows OWASP (Open Web Application Security
-// Project) best practices:
-//   - Secrets (Mongo URI, JWT secret, PayPal client-id) come ONLY from
-//     environment variables. Nothing sensitive is hard-coded, and the app
-//     refuses to start if a required secret is missing.
-//   - helmet sets secure HTTP (HyperText Transfer Protocol) response headers.
-//   - CORS (Cross-Origin Resource Sharing) is restricted to a configured
-//     allow-list instead of every origin.
-//   - A NoSQL (Not only SQL) sanitizer strips MongoDB operator-injection
-//     payloads from all incoming data.
-//   - Rate limiters throttle the whole API and, more strictly, the sensitive
-//     auth and contact endpoints.
+// Application entry point. Security hardening follows OWASP best practices: secrets from env vars only, helmet headers, restricted CORS, NoSQL sanitization, and rate limiting.
 
 const express = require('express');
 const mongoose = require('mongoose');
@@ -23,9 +10,7 @@ require('dotenv').config();
 const sanitize = require('./middleware/sanitize');
 const { apiLimiter } = require('./middleware/rateLimiters');
 
-// --- FAIL FAST ON MISSING SECRETS -------------------------------------------
-// Rather than starting with an undefined JWT_SECRET (which would silently make
-// every token forgeable) we stop immediately and tell the operator what to fix.
+// Fail fast if a required secret is missing, instead of running with an undefined JWT_SECRET.
 const REQUIRED_ENV = ['MONGO_URI', 'JWT_SECRET'];
 const missing = REQUIRED_ENV.filter((name) => !process.env[name]);
 if (missing.length) {
@@ -38,33 +23,19 @@ if (missing.length) {
 
 const app = express();
 
-// Render.com (and most hosts) sit behind a reverse proxy. Trusting the first
-// proxy hop makes req.ip reflect the real client address, which the IP-based
-// rate limiters depend on. "1" = trust exactly one proxy, which is safer than
-// "true" (trust everything) for rate-limit accuracy.
+// Trust exactly one proxy hop (Render.com) so req.ip reflects the real client for rate limiting.
 app.set('trust proxy', 1);
 
-// --- SECURITY HEADERS -------------------------------------------------------
-// helmet sets a bundle of protective headers. We keep its Content Security
-// Policy relaxed enough to allow the PayPal SDK (Software Development Kit) and
-// inline scripts the existing single-page app relies on, while still blocking
-// obviously unsafe sources. Tighten these further if inline scripts are removed.
+// helmet's CSP is relaxed enough to allow the PayPal SDK and the SPA's inline scripts.
 app.use(
     helmet({
         contentSecurityPolicy: {
             directives: {
                 defaultSrc: ["'self'"],
                 scriptSrc: ["'self'", "'unsafe-inline'", 'https://*.paypal.com', 'https://*.paypalobjects.com'],
-                // The SPA uses inline onclick="..." handlers (e.g. on product
-                // cards and the service slider). Browsers govern those with the
-                // separate script-src-attr directive, which helmet defaults to
-                // 'none'. Allowing 'unsafe-inline' here re-enables those clicks.
+                // Needed for the SPA's inline onclick handlers (product cards, service slider).
                 scriptSrcAttr: ["'unsafe-inline'"],
-                // The PayPal JS SDK (Software Development Kit) loads scripts,
-                // iframes, images and XHR (XMLHttpRequest) calls from several
-                // PayPal subdomains (www., www.sandbox., c., ...). A narrower
-                // list partially loads the SDK and then fails with "something
-                // went wrong", so we allow the whole *.paypal.com family.
+                // Whole *.paypal.com family allowed — a narrower list breaks the PayPal SDK.
                 frameSrc: ["'self'", 'https://*.paypal.com'],
                 imgSrc: ["'self'", 'data:', 'https:'],
                 connectSrc: ["'self'", 'https://*.paypal.com', 'https://*.paypalobjects.com'],
@@ -77,10 +48,7 @@ app.use(
     })
 );
 
-// --- CORS (restricted) ------------------------------------------------------
-// Instead of allowing every origin, we read a comma-separated allow-list from
-// the CORS_ORIGINS env var. If it is not set we fall back to same-origin only,
-// which is correct for this app because the frontend is served by this server.
+// Comma-separated allow-list from CORS_ORIGINS; falls back to same-origin only if unset.
 const allowedOrigins = (process.env.CORS_ORIGINS || '')
     .split(',')
     .map((o) => o.trim())
@@ -89,9 +57,7 @@ const allowedOrigins = (process.env.CORS_ORIGINS || '')
 app.use(
     cors({
         origin: function (origin, callback) {
-            // Requests with no Origin header (same-origin fetches, curl, server
-            // to server) are allowed. Browser cross-origin requests are only
-            // allowed if the origin is on the list.
+            // No Origin header (same-origin, curl, server-to-server) is always allowed.
             if (!origin || allowedOrigins.length === 0 || allowedOrigins.includes(origin)) {
                 return callback(null, true);
             }
@@ -100,22 +66,15 @@ app.use(
     })
 );
 
-// --- BODY PARSING + SANITIZATION --------------------------------------------
 // Cap the JSON body size so a client cannot exhaust memory with a huge payload.
 app.use(express.json({ limit: '10kb' }));
-// Strip MongoDB operator-injection keys ($gt, $where, dotted paths, ...) from
-// every request before any route or model sees the data.
+// Strip MongoDB operator-injection keys ($gt, $where, dotted paths, ...) from every request.
 app.use(sanitize);
 
 // Static frontend assets.
 app.use(express.static('public'));
 
-// --- PUBLIC RUNTIME CONFIG --------------------------------------------------
-// The PayPal client-id is a PUBLIC identifier (it is meant to appear in the
-// browser), but hard-coding it in HTML means a key change requires editing many
-// files. Instead we expose it here from an env var so the frontend can fetch it
-// at runtime and there is a single source of truth. NOTE: only the client-id is
-// public -- the PayPal SECRET must never be sent to the browser.
+// PayPal client-id is public by design; the PayPal SECRET must never be sent to the browser.
 app.get('/api/config', (req, res) => {
     res.json({
         paypalClientId: process.env.PAYPAL_CLIENT_ID || '',
@@ -123,35 +82,24 @@ app.get('/api/config', (req, res) => {
     });
 });
 
-// --- RATE LIMITING (broad) --------------------------------------------------
-// Apply the broad limiter to the whole API. Individual routers add their own
-// stricter limiters (auth, contact, writes) on top of this.
+// Broad limiter for the whole API; individual routers add stricter limiters on top.
 app.use('/api', apiLimiter);
 
-// --- ROUTES -----------------------------------------------------------------
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/products', require('./routes/products'));
 app.use('/api/orders', require('./routes/orders'));
 app.use('/api/contact', require('./routes/contact'));
 
-// Single-page-app fallback: any non-API GET returns index.html so client-side
-// routing (history.pushState) works on deep links and refreshes.
-// NOTE: Express 5 changed wildcard syntax — a bare '*' now throws. The named
-// wildcard '/*splat' is the Express 5 equivalent of the old catch-all.
+// SPA fallback: any non-API GET returns index.html so client-side routing works on deep links.
 app.get('/*splat', (req, res) => {
-    // If the path looks like a file (has an extension, e.g. /foo/style.css or
-    // /services/images/x.jpg) it is a missing asset, not a page. Return a real
-    // 404 rather than HTML so a broken path is obvious instead of the browser
-    // silently trying to parse index.html as CSS or an image.
+    // A path with a file extension is a missing asset, not a page — return a real 404.
     if (path.extname(req.path)) {
         return res.status(404).json({ message: 'Not found' });
     }
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// --- ERROR HANDLER ----------------------------------------------------------
-// Centralized handler so thrown errors (including the CORS rejection above)
-// return clean JSON instead of a stack trace, which would leak internals.
+// Centralized error handler returns clean JSON instead of a stack trace.
 // eslint-disable-next-line no-unused-vars
 app.use((err, req, res, next) => {
     if (err && err.message === 'Not allowed by CORS') {
@@ -161,7 +109,6 @@ app.use((err, req, res, next) => {
     res.status(500).json({ message: 'Server error' });
 });
 
-// --- DATABASE + STARTUP -----------------------------------------------------
 mongoose
     .connect(process.env.MONGO_URI)
     .then(() => console.log('MongoDB connected'))

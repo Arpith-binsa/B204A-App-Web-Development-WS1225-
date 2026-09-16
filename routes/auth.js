@@ -7,9 +7,7 @@ const { authLimiter } = require('../middleware/rateLimiters');
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-// Reject any request whose body contains keys we do not expect. This enforces
-// a strict schema at the edge (OWASP input-validation guidance) so attackers
-// cannot smuggle extra fields such as "role" to escalate to admin.
+// Reject any request whose body contains unexpected keys (blocks smuggling fields like "role").
 function onlyAllow(allowed) {
     return function (req, res, next) {
         const body = req.body || {};
@@ -21,9 +19,7 @@ function onlyAllow(allowed) {
     };
 }
 
-// REGISTER
-// authLimiter throttles repeated attempts; onlyAllow blocks any field other
-// than the three we expect (crucially, it blocks a client-supplied "role").
+// Register: authLimiter throttles repeated attempts; onlyAllow blocks a client-supplied "role".
 router.post('/register', authLimiter, onlyAllow(['name', 'email', 'password']), async (req, res) => {
     try {
         const { name, email, password } = req.body;
@@ -62,7 +58,6 @@ router.post('/register', authLimiter, onlyAllow(['name', 'email', 'password']), 
     }
 });
 
-// LOGIN
 router.post('/login', authLimiter, onlyAllow(['email', 'password']), async (req, res) => {
     try {
         const { email, password } = req.body;
@@ -97,7 +92,6 @@ router.post('/login', authLimiter, onlyAllow(['email', 'password']), async (req,
     }
 });
 
-// GET CURRENT USER
 router.get('/me', require('../middleware/auth'), async (req, res) => {
     try {
         const user = await User.findById(req.user.id).select('-password');

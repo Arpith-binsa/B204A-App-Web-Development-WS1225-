@@ -1,4 +1,4 @@
-// cart.js — shared across all pages
+// Shared cart logic, loaded on every page.
 
 function getCart() {
     return JSON.parse(localStorage.getItem('cart')) || {};

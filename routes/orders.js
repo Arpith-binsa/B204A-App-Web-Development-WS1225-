@@ -7,12 +7,9 @@ const { writeLimiter } = require('../middleware/rateLimiters');
 
 const ALLOWED_FIELDS = ['items', 'total', 'paypalOrderId'];
 
-// writeLimiter throttles order creation; the user is taken from the verified
-// JWT (JSON Web Token), never from the request body, so it cannot be spoofed.
+// The user comes from the verified JWT, never the request body, so it can't be spoofed.
 router.post('/', writeLimiter, authMiddleware, async (req, res) => {
     try {
-        // Strict schema: ignore/reject anything beyond the three expected keys
-        // (blocks a client trying to set "user", "status", etc. directly).
         const extra = Object.keys(req.body || {}).filter((k) => !ALLOWED_FIELDS.includes(k));
         if (extra.length) {
             return res.status(400).json({ message: `Unexpected field(s): ${extra.join(', ')}` });

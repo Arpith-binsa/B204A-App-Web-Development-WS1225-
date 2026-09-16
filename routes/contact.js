@@ -18,10 +18,8 @@ const MessageSchema = new mongoose.Schema({
 
 const Message = mongoose.model('Message', MessageSchema);
 
-// contactLimiter caps submissions per IP (Internet Protocol) to stop spam.
 router.post('/', contactLimiter, async (req, res) => {
     try {
-        // Strict schema: reject any field we did not ask for.
         const extra = Object.keys(req.body || {}).filter((k) => !ALLOWED_FIELDS.includes(k));
         if (extra.length) {
             return res.status(400).json({ message: `Unexpected field(s): ${extra.join(', ')}` });
